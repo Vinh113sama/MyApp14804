@@ -7,12 +7,9 @@ import kotlinx.parcelize.Parcelize
 data class Song(
     val id: Int,
     val title: String,
-    val titleNormalized: String,
     val duration: Int,
     val url: String,
     val imageUrl: String?,
-    val artistId: Int,
-    val createdAt: String,
     val artist: Artist,
 ) : Parcelable
 
@@ -20,7 +17,35 @@ data class Song(
 data class Artist(
     val id: Int,
     val name: String,
-    val nameNormalized: String,
-    val imageUrl: String?,
-    val createdAt: String
 ) : Parcelable
+
+data class SongUrlResponse(
+    val data: SongUrl
+)
+
+data class SongUrl(
+    val url: String
+)
+
+
+data class HistoryResponse(
+    val data: List<PlayedSong>
+)
+
+data class PlayedSong(
+    val id: Int,
+    val song: Song
+)
+
+@Parcelize
+data class FavoriteResponse(
+    val data: List<Song>
+): Parcelable
+
+data class FavoriteRequest(
+    val songId : Int
+)
+
+data class BaseResponse(
+    val message: String
+)

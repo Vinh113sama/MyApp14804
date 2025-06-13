@@ -3,8 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_menu"
-    app:startDestination="@id/fragment_song_list">
-
+    app:startDestination="@id/songListFragment">
+    <fragment
+        android:id="@+id/songListFragment"
+        android:name="com.example.myapp.fragment.SongListFragment"
+        android:label="fragment_songlist"
+        tools:layout="@layout/fragment_song_list">
+        <action
+            android:id="@+id/action_songListFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+        <action
+            android:id="@+id/action_songListFragment_to_favoriteFragment"
+            app:destination="@id/favoriteFragment" />
+        <action
+            android:id="@+id/action_songListFragment_to_playlistListFragment"
+            app:destination="@id/playlistListFragment" />
+    </fragment>
     <fragment
         android:id="@+id/favoriteFragment"
         android:name="com.example.myapp.fragment.FavoriteFragment"
@@ -18,6 +32,9 @@
         <action
             android:id="@+id/action_playlistListFragment_to_playlistFragment"
             app:destination="@id/playlistFragment" />
+        <action
+            android:id="@+id/action_playlistListFragment_to_playlistFragment2"
+            app:destination="@id/playlistFragment" />
     </fragment>
     <fragment
         android:id="@+id/playlistFragment"
@@ -29,9 +46,4 @@
         android:name="com.example.myapp.fragment.HistoryFragment"
         android:label="fragment_history"
         tools:layout="@layout/fragment_history" />
-    <fragment
-        android:id="@+id/fragment_song_list"
-        android:name="com.example.myapp.fragment.SongListFragment"
-        android:label="fragment_song_list"
-        tools:layout="@layout/fragment_song_list" />
 </navigation>

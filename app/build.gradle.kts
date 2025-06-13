@@ -1,8 +1,8 @@
 plugins {
     id("com.android.application")
-    id ("org.jetbrains.kotlin.android")
-    id ("kotlin-parcelize")
-    id ("kotlin-kapt")
+    id("org.jetbrains.kotlin.android")
+    id("kotlin-parcelize")
+    id("kotlin-kapt")
 }
 
 android {
@@ -48,6 +48,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.glide)
     implementation(libs.glide.transformations)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.session)
+    implementation(libs.media3.exoplayer.hls)
     kapt(libs.glide.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

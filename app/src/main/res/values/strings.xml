@@ -14,6 +14,7 @@
     <string name="imgbtn_content">img</string>
     <string name="label_start_time">00:00</string>
     <string name="label_imgbutton">imgbutton</string>
+    <string name="btn_play_all">Play all songs</string>
 
     //item
     <string name="text_artist_name">Artist Name</string>
@@ -32,6 +33,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     //add playlist
     <string name="btn_add">Thêm Playlist</string>
+    <string name="no_song">Không có bài hát</string>
     <string name="hint_playlist_name">Nhập tên Playlist</string>
     <string name="tv_playlist_name">Tên Playlist</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>

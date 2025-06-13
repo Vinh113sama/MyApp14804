@@ -11,7 +11,7 @@
         android:icon="@drawable/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
-        android:theme="@style/AppTheme"
+        android:theme="@style/Theme.MyApp.Base"
         android:usesCleartextTraffic="true"
         tools:ignore="MissingClass,UnusedAttribute">
         <activity
