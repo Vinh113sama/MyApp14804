@@ -7,21 +7,40 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.myapp.R
 import com.example.myapp.activity.HomeActivity
 import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentSongListBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.SongAdapter
+import com.example.myapp.process.login.SongType
+import com.example.myapp.repository.SongRepository
+import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 
+
+@Suppress("UNCHECKED_CAST")
 class SongListFragment : Fragment() {
 
     private var _binding: FragmentSongListBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: SongAdapter
+
+    private val viewModel: SongViewModel by viewModels {
+        object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                val repository = SongRepository(RetrofitClient.apiService)
+                return SongViewModel(repository) as T
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,8 +55,40 @@ class SongListFragment : Fragment() {
         binding.imgbtnMenu.setOnClickListener {
             (activity as? HomeActivity)?.openDrawer()
         }
+        binding.imgbtnSearch.setOnClickListener {
+            if (binding.edtSearch.text.toString().isNotEmpty()) {
+                val action = SongListFragmentDirections.actionSongListFragmentToSearchFragment(binding.edtSearch.text.toString())
+                findNavController().navigate(action)
+            }
+        }
+        binding.rcPopular.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val totalItemCount = layoutManager.itemCount
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+
+                if (!viewModel.isLoading.value && !viewModel.isLastPage.value &&
+                    totalItemCount <= lastVisibleItem + 2
+                ) {
+                    viewModel.loadSongs(SongType.ALL)
+                }
+            }
+        })
+
         setupRecyclerView()
-        fetchSongs()
+        observeSongs()
+        viewModel.loadSongs(SongType.ALL)
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun observeSongs() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.songs.collectLatest { songList ->
+                adapter.submitList(songList)
+            }
+        }
     }
 
     @OptIn(UnstableApi::class)
@@ -53,17 +104,6 @@ class SongListFragment : Fragment() {
                 putExtra("position", position)
             }
             startActivity(intent)
-        }
-    }
-
-    private fun fetchSongs() {
-        lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.apiService.getSongs()
-                adapter.submitList(response.data)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
     }
 

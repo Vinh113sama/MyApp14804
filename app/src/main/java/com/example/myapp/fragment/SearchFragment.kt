@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -15,7 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.activity.PlaySongActivity
-import com.example.myapp.databinding.FragmentFavoriteBinding
+import com.example.myapp.databinding.FragmentSearchBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.SongAdapter
 import com.example.myapp.process.login.SongType
@@ -27,11 +26,11 @@ import kotlin.getValue
 
 
 @Suppress("UNCHECKED_CAST")
-class FavoriteFragment : Fragment() {
-    private var _binding: FragmentFavoriteBinding? = null
+class SearchFragment : Fragment() {
+    private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: SongAdapter
-
+    private var keyword = ""
     private val viewModel: SongViewModel by viewModels {
         object : androidx.lifecycle.ViewModelProvider.Factory {
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
@@ -47,7 +46,7 @@ class FavoriteFragment : Fragment() {
 
 
     ): View? {
-        _binding = FragmentFavoriteBinding.inflate(inflater, container, false)
+        _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -56,8 +55,8 @@ class FavoriteFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         adapter = SongAdapter()
-        binding.rcFavoriteSongs.layoutManager = LinearLayoutManager(requireContext())
-        binding.rcFavoriteSongs.adapter = adapter
+        binding.rcSearchResults.layoutManager = LinearLayoutManager(requireContext())
+        binding.rcSearchResults.adapter = adapter
 
         adapter.setOnItemClickListener { song, position ->
             val intent = Intent(requireContext(), PlaySongActivity::class.java)
@@ -66,20 +65,7 @@ class FavoriteFragment : Fragment() {
             startActivity(intent)
         }
 
-        binding.btnPlayAll.setOnClickListener {
-            val songs = adapter.currentList
-            if (songs.isNotEmpty()) {
-                val intent = Intent(requireContext(), PlaySongActivity::class.java).apply {
-                    putParcelableArrayListExtra("playlist", ArrayList(songs))
-                    putExtra("song", songs[0])
-                    putExtra("position", 0)
-                }
-                startActivity(intent)
-            } else {
-                Toast.makeText(requireContext(), "Danh sách trống", Toast.LENGTH_SHORT).show()
-            }
-        }
-        binding.rcFavoriteSongs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.rcSearchResults.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -90,7 +76,7 @@ class FavoriteFragment : Fragment() {
                 if (!viewModel.isLoading.value && !viewModel.isLastPage.value &&
                     totalItemCount <= lastVisibleItem + 2
                 ) {
-                    viewModel.loadSongs(SongType.FAVORITE)
+                    viewModel.loadSongs(SongType.ALL, keyword)
                 }
             }
         })
@@ -98,8 +84,9 @@ class FavoriteFragment : Fragment() {
         binding.imgbtnBack.setOnClickListener {
             findNavController().popBackStack()
         }
+        keyword = arguments?.getString("keyword").orEmpty()
+        viewModel.clearSongs()
         observeSongs()
-        viewModel.loadSongs(SongType.FAVORITE)
     }
 
     @OptIn(UnstableApi::class)
@@ -113,7 +100,7 @@ class FavoriteFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.refresh(SongType.FAVORITE)
+        viewModel.refresh(SongType.ALL, keyword)
     }
 
     override fun onDestroyView() {

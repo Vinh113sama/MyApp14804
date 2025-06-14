@@ -1,6 +1,6 @@
 package com.example.myapp.process.getsong
 
-import com.google.gson.annotations.SerializedName
+
 
 data class SongResponse(
     val data: List<Song>,

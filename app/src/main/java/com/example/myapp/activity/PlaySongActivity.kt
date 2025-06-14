@@ -207,6 +207,9 @@ class PlaySongActivity : AppCompatActivity() {
         binding.imgbtnPlay.setImageResource(R.drawable.ic_pause)
         player.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
+                if(state == Player.STATE_READY) {
+                    startSeekBarUpdate()
+                }
                 if (state == Player.STATE_ENDED) {
                     handler.removeCallbacks(runnable)
                     if (isShuffle) {
@@ -224,8 +227,6 @@ class PlaySongActivity : AppCompatActivity() {
                 }
             }
         })
-
-        startSeekBarUpdate()
     }
 
     private fun nextSong() {
@@ -275,8 +276,7 @@ class PlaySongActivity : AppCompatActivity() {
             handler.post(runnable)
         }
     }
-
-
+    
     private fun formatDuration(seconds: Int): String {
         val minutes = seconds / 60
         val remainingSeconds = seconds % 60

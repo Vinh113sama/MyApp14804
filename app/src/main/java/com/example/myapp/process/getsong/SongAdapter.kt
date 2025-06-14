@@ -29,7 +29,7 @@ class SongAdapter : ListAdapter<Song, SongAdapter.SongViewHolder>(DiffCallback) 
 
         holder.binding.tvSongName.text = song.title
         holder.binding.tvArtistName.text = song.artist.name
-        holder.binding.tvDuration.text = fomartDuration(song.duration)
+        holder.binding.tvDuration.text = fomatDuration(song.duration)
 
         Glide.with(holder.itemView.context)
             .load(song.imageUrl)
@@ -40,7 +40,7 @@ class SongAdapter : ListAdapter<Song, SongAdapter.SongViewHolder>(DiffCallback) 
         }
     }
 
-    private fun fomartDuration(seconds: Int): String {
+    private fun fomatDuration(seconds: Int): String {
         val minutes = seconds / 60
         val remainingSeconds = seconds % 60
         return String.format(Locale.getDefault() ,"%02d:%02d", minutes, remainingSeconds)
