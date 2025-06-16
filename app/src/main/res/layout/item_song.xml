@@ -41,8 +41,8 @@
 
         <TextView
             android:id="@+id/tv_artist_name"
-            android:layout_width="217dp"
-            android:layout_height="32dp"
+            android:layout_width="245dp"
+            android:layout_height="22dp"
             android:layout_marginStart="16dp"
             android:text="@string/text_artist_name"
             app:layout_constraintEnd_toEndOf="parent"
@@ -64,16 +64,14 @@
             android:id="@+id/imgbtn_favorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/add_favorite"
+            android:tint="#673AB7"
             app:srcCompat="@drawable/ic_delete_favorite"
             card_view:layout_constraintBottom_toTopOf="@+id/tv_duration"
             card_view:layout_constraintEnd_toEndOf="parent"
-            card_view:layout_constraintHorizontal_bias="0.0"
             card_view:layout_constraintStart_toEndOf="@+id/tv_artist_name"
             card_view:layout_constraintTop_toTopOf="@+id/tv_artist_name"
-            card_view:layout_constraintVertical_bias="0.875"
             tools:ignore="TouchTargetSizeCheck,UseAppTint" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
