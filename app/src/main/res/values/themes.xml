@@ -1,7 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.MyApp.Base" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:colorBackground">@color/brown148</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:colorBackground">@color/black</item>
+        <item name="android:textColor">@color/white</item>
     </style>
+
+    <style name="AppleNavigationItemShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
     <style name="Theme.MyApp" parent="Theme.MaterialComponents.DayNight.DarkActionBar"/>
 </resources>

@@ -5,15 +5,15 @@
     <color name="light_blue_900">#FF01579B</color>
     <color name="light_blue_A200">#FF40C4FF</color>
     <color name="light_blue_A400">#FF00B0FF</color>
-
+    <color name="search_bar_background">#1E1E1E</color>
     <color name="textColorPrimary">#000000</color>
     <color name="textColorSecondary">#6D6E70</color>
-
+    <color name="pink">#FFB6C1</color>
+    <color name="pink2">#F6F1F8</color>
     <color name="black_overlay">#667C7474</color>
     <color name="nen">#3C3831</color>
     <color name="colorPrimary">#07112a</color>
     <color name="colorPrimaryDark">#07112a</color>
-
     <color name="colorAccent">#ff835f</color>
     <color name="brown148">#95746B</color>
     <color name="orange">#ff835f</color>
@@ -34,4 +34,25 @@
     <color name="red">#F80A0A</color>
     <color name="white">#FFFFFFFF</color>
     <color name="xam2">#393838</color>
+    <color name="glass_background">#1A1A1A</color>
+    <color name="glass_card">#1E1E1E</color>
+    <color name="glass_light">#2A2A2A</color>
+    <color name="glass_dark">#15151580</color>
+    <color name="glass_navigation">#1A1A1AE6</color>
+    <color name="glass_input">#1E1E1E</color>
+    <color name="apple_gray">#8E8E93</color>
+    <color name="apple_gray_light">#C7C7CC</color>
+    <color name="apple_dark">#1C1C1E</color>
+    <color name="apple_accent">#FF375F</color>
+    <color name="apple_accent_dark">#FF2D4F</color>
+    <color name="apple_gray_dark">#48484A</color>
+    <color name="apple_red_dark">#D70015</color>
+    <color name="apple_red">#FA2F4A</color>
+    <color name="apple_blue">#007AFF</color>
+    <color name="apple_purple">#AF52DE</color>
+    <color name="apple_green">#34C759</color>
+    <color name="apple_orange">#FF9500</color>
+    <color name="gray">#8E8E93</color>
+    <color name="primary_color">#FA2D48</color>
+    <color name="drawer_background_dark">#000000</color>
 </resources>

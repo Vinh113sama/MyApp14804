@@ -13,7 +13,6 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapp.R
 import com.example.myapp.activity.HomeActivity
 import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentSongListBinding
@@ -55,12 +54,7 @@ class SongListFragment : Fragment() {
         binding.imgbtnMenu.setOnClickListener {
             (activity as? HomeActivity)?.openDrawer()
         }
-        binding.imgbtnSearch.setOnClickListener {
-            if (binding.edtSearch.text.toString().isNotEmpty()) {
-                val action = SongListFragmentDirections.actionSongListFragmentToSearchFragment(binding.edtSearch.text.toString())
-                findNavController().navigate(action)
-            }
-        }
+
         binding.rcPopular.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)

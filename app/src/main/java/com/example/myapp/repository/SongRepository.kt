@@ -2,6 +2,7 @@ package com.example.myapp.repository
 
 
 import com.example.myapp.process.getsong.ApiService
+import com.example.myapp.process.getsong.FavoriteRequest
 import com.example.myapp.process.getsong.Song
 
 
@@ -15,6 +16,13 @@ class SongRepository(private val apiService: ApiService) {
         return apiService.getFavoriteSongs(page, limit).data
     }
 
+    suspend fun postFavoriteSong(songId: Int) {
+        apiService.postFavoriteSong(FavoriteRequest(songId))
+    }
+
+    suspend fun deleteFavorite(songId: Int) {
+        apiService.deleteFavoriteSong(FavoriteRequest(songId))
+    }
     suspend fun getHistorySongs(page: Int, limit: Int = 10): List<Song> {
         return apiService.getHistorySongs(page, limit).data.map { it.song }
     }

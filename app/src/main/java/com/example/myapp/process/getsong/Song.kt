@@ -11,6 +11,7 @@ data class Song(
     val url: String,
     val imageUrl: String?,
     val artist: Artist,
+    var isFavorite: Boolean = false
 ) : Parcelable
 
 @Parcelize
@@ -47,5 +48,6 @@ data class FavoriteRequest(
 )
 
 data class BaseResponse(
+    val success: Boolean,
     val message: String
 )

@@ -9,7 +9,8 @@
     <string name="btn_log_in">Log in</string>
     <string name="btn_register">Register</string>
     <string name="hint_password_again">Re-enter your password</string>
-
+    <string name="explore_music">Explore</string>
+    <string name="created_date">Created %s</string>
     //play song
     <string name="imgbtn_content">img</string>
     <string name="label_start_time">00:00</string>
@@ -31,7 +32,7 @@
     <string name="popular_songs">Popular Songs</string>
     <string name="history_songs">History Songs</string>
     <string name="home">Home</string>
-    <string name="hint_search">Search</string>
+    <string name="hint_search">Enter song name or artist name</string>
     <!-- TODO: Remove or change this placeholder text -->
     //add playlist
     <string name="btn_add">Thêm Playlist</string>
