@@ -31,7 +31,7 @@
     <string name="popular_songs">Popular Songs</string>
     <string name="history_songs">History Songs</string>
     <string name="home">Home</string>
-    <string name="hint_search">Search</string>
+    <string name="hint_search">Enter song name or artist name</string>
     <!-- TODO: Remove or change this placeholder text -->
     //add playlist
     <string name="btn_add">Thêm Playlist</string>

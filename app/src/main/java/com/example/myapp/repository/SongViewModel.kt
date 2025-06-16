@@ -53,6 +53,31 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
         }
     }
 
+    fun toggleFavorite(song: Song, isFromFavoriteScreen: Boolean = false) {
+        viewModelScope.launch {
+            try {
+                if (song.isFavorite) {
+                    repository.deleteFavorite(song.id)
+                    song.isFavorite = false
+                } else {
+                    repository.postFavoriteSong(song.id)
+                    song.isFavorite = true
+                }
+
+                _songs.value = _songs.value.map {
+                    if (it.id == song.id) song else it
+                }
+
+                if (isFromFavoriteScreen) {
+                    refresh(SongType.FAVORITE)
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun refresh(type: SongType, keyword: String? = null) {
         currentPage = 1
         _isLastPage.value = false

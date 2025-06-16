@@ -15,7 +15,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_play_all"
         tools:ignore="SpeakableTextPresentCheck"
-        tools:listitem="@layout/item_favorite_songs" />
+        tools:listitem="@layout/item_song" />
 
     <TextView
         android:id="@+id/ic_fragment_name"

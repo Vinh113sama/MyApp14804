@@ -1,15 +1,24 @@
 package com.example.myapp.activity
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.view.animation.LinearInterpolator
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import com.bumptech.glide.Glide
 import com.example.myapp.R
 import com.example.myapp.databinding.ActivityHomeBinding
+import com.example.myapp.databinding.MiniPlayerBinding
+import com.example.myapp.util.AppViewModelProvider
 import com.google.android.material.navigation.NavigationView
 
 class HomeActivity : AppCompatActivity() {
@@ -19,19 +28,63 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var navView: NavigationView
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
+    val musicViewModel = AppViewModelProvider.provideMusicPlayerViewModel()
+    private lateinit var miniPlayerBinding: MiniPlayerBinding
+    private var rotationAnimator: ObjectAnimator? = null
+    private var currentRotation = 0f
 
+    @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.miniPlayerContainer) { view, insets ->
             insets
         }
+        miniPlayerBinding = MiniPlayerBinding.bind(binding.miniPlayerContainer)
         initViews()
         setupNavigationMenu()
+        setupMiniPlayer()
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun setupMiniPlayer() {
+        musicViewModel.currentSong.observe(this) { song ->
+            if (song != null) {
+                miniPlayerBinding.tvMiniTitle.text = song.title
+                miniPlayerBinding.tvMiniArtist.text = song.artist.name
+                Glide.with(this)
+                    .load(song.imageUrl)
+                    .placeholder(R.drawable.image_no_available)
+                    .error(R.drawable.image_no_available)
+                    .into(miniPlayerBinding.imgMiniSong)
+            } else {
+                miniPlayerBinding.root.visibility = View.GONE
+            }
+        }
+
+        binding.miniPlayerContainer.setOnClickListener {
+            val playlist = musicViewModel.playlist.value ?: emptyList()
+            val position = playlist.indexOf(musicViewModel.currentSong.value)
+            val intent = Intent(this, PlaySongActivity::class.java)
+            intent.putParcelableArrayListExtra("playlist", ArrayList(playlist))
+            intent.putExtra("position", position)
+            intent.putExtra("fromMiniPlayer", true)
+            startActivity(intent)
+        }
+
+        miniPlayerBinding.imgbtnNext.setOnClickListener {
+            musicViewModel.playNext()
+        }
+
+        miniPlayerBinding.imgbtnPlayPause.setOnClickListener {
+            musicViewModel.togglePlayPause()
+        }
+
+        musicViewModel.isPlaying.observe(this) { isPlaying ->
+            updatePlayPauseIcon(isPlaying)
+        }
     }
 
     private fun initViews() {
@@ -63,7 +116,58 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
+    private fun updatePlayPauseIcon(isPlaying: Boolean) {
+        miniPlayerBinding.imgbtnPlayPause.setImageResource(
+            if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+        )
+        startOrStopRotation(isPlaying)
+    }
+
+    private fun updateMiniPlayerUI() {
+        val song = musicViewModel.currentSong.value
+        if (song != null) {
+            miniPlayerBinding.tvMiniTitle.text = song.title
+            miniPlayerBinding.tvMiniArtist.text = song.artist.name
+            Glide.with(this)
+                .load(song.imageUrl)
+                .placeholder(R.drawable.image_no_available)
+                .error(R.drawable.image_no_available)
+                .into(miniPlayerBinding.imgMiniSong)
+            val isPlaying = musicViewModel.isPlaying.value ?: false
+            updatePlayPauseIcon(isPlaying)
+        } else {
+            miniPlayerBinding.root.visibility = View.GONE
+        }
+    }
+
     fun openDrawer() {
         drawerLayout.openDrawer(GravityCompat.START)
+    }
+
+    private fun startOrStopRotation(isPlaying: Boolean) {
+        if (rotationAnimator == null) {
+            rotationAnimator = ObjectAnimator.ofFloat(miniPlayerBinding.imgMiniSong, View.ROTATION, currentRotation, currentRotation + 360f).apply {
+                duration = 10000
+                interpolator = LinearInterpolator()
+                repeatCount = ValueAnimator.INFINITE
+                addUpdateListener {
+                    currentRotation = miniPlayerBinding.imgMiniSong.rotation % 360f
+                }
+            }
+        } else {
+            rotationAnimator?.setFloatValues(currentRotation, currentRotation + 360f)
+        }
+
+        if (isPlaying) {
+            rotationAnimator?.start()
+        } else {
+            rotationAnimator?.pause()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        miniPlayerBinding.root.visibility = View.VISIBLE
+        updateMiniPlayerUI()
     }
 }

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentFavoriteBinding
 import com.example.myapp.process.RetrofitClient
+import com.example.myapp.process.getsong.FavoriteRequest
 import com.example.myapp.process.getsong.SongAdapter
 import com.example.myapp.process.login.SongType
 import com.example.myapp.repository.SongRepository
@@ -55,7 +56,7 @@ class FavoriteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = SongAdapter()
+        adapter = SongAdapter(true)
         binding.rcFavoriteSongs.layoutManager = LinearLayoutManager(requireContext())
         binding.rcFavoriteSongs.adapter = adapter
 
@@ -98,6 +99,10 @@ class FavoriteFragment : Fragment() {
         binding.imgbtnBack.setOnClickListener {
             findNavController().popBackStack()
         }
+        adapter.setOnFavoriteClickListener { song ->
+            viewModel.toggleFavorite(song, true)
+        }
+
         observeSongs()
         viewModel.loadSongs(SongType.FAVORITE)
     }

@@ -8,12 +8,12 @@
 
     <color name="textColorPrimary">#000000</color>
     <color name="textColorSecondary">#6D6E70</color>
-
+    <color name="pink">#FFB6C1</color>
+    <color name="pink2">#F6F1F8</color>
     <color name="black_overlay">#667C7474</color>
     <color name="nen">#3C3831</color>
     <color name="colorPrimary">#07112a</color>
     <color name="colorPrimaryDark">#07112a</color>
-
     <color name="colorAccent">#ff835f</color>
     <color name="brown148">#95746B</color>
     <color name="orange">#ff835f</color>

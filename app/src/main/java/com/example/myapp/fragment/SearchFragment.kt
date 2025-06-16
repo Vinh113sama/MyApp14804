@@ -13,6 +13,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapp.R
 import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentSearchBinding
 import com.example.myapp.process.RetrofitClient
@@ -94,6 +95,11 @@ class SearchFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.songs.collectLatest { songList ->
                 adapter.submitList(songList)
+                if (songList.isEmpty()) {
+                    binding.tvResults.text = getString(R.string.search_no_result)
+                } else {
+                    binding.tvResults.text = getString(R.string.search_result)
+                }
             }
         }
     }
