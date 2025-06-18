@@ -2,36 +2,37 @@ package com.example.myapp.fragment
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.os.Handler
+import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.OptIn
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.R
 import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentSearchBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.SongAdapter
-import com.example.myapp.process.login.SongType
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlin.getValue
-
 
 @Suppress("UNCHECKED_CAST")
 class SearchFragment : Fragment() {
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: SongAdapter
-    private var keyword = ""
+    private val handler = Handler(Looper.getMainLooper())
+
     private val viewModel: SongViewModel by viewModels {
         object : androidx.lifecycle.ViewModelProvider.Factory {
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
@@ -44,9 +45,7 @@ class SearchFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-
-
-    ): View? {
+    ): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -55,6 +54,17 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecyclerView()
+        setupSearchListener()
+        observeSearchResults()
+
+        binding.edtSearch.requestFocus()
+        binding.imgbtnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun setupRecyclerView() {
         adapter = SongAdapter()
         binding.rcSearchResults.layoutManager = LinearLayoutManager(requireContext())
         binding.rcSearchResults.adapter = adapter
@@ -65,49 +75,42 @@ class SearchFragment : Fragment() {
             intent.putExtra("position", position)
             startActivity(intent)
         }
+    }
 
-        binding.rcSearchResults.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val totalItemCount = layoutManager.itemCount
-                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+    private fun setupSearchListener() {
+        binding.edtSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-
-                if (!viewModel.isLoading.value && !viewModel.isLastPage.value &&
-                    totalItemCount <= lastVisibleItem + 2
-                ) {
-                    viewModel.loadSongs(SongType.ALL, keyword)
-                }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                handler.removeCallbacksAndMessages(null)
+                handler.postDelayed({
+                    val query = s?.toString().orEmpty().trim()
+                    if (query.isEmpty()) {
+                        adapter.submitList(emptyList())
+                        binding.tvResults.text = ""
+                    } else {
+                        viewModel.searchSong(query)
+                    }
+                }, 300)
             }
+
+            override fun afterTextChanged(s: Editable?) {}
         })
-
-        binding.imgbtnBack.setOnClickListener {
-            findNavController().popBackStack()
-        }
-        keyword = arguments?.getString("keyword").orEmpty()
-        viewModel.clearSongs()
-        observeSongs()
     }
 
-    @OptIn(UnstableApi::class)
-    private fun observeSongs() {
+    private fun observeSearchResults() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.songs.collectLatest { songList ->
+            viewModel.searchResults.collectLatest { songList ->
                 adapter.submitList(songList)
-                if (songList.isEmpty()) {
-                    binding.tvResults.text = getString(R.string.search_no_result)
+                binding.tvResults.text = if (songList.isEmpty()) {
+                    getString(R.string.search_no_result)
                 } else {
-                    binding.tvResults.text = getString(R.string.search_result)
+                    getString(R.string.search_result)
                 }
             }
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.refresh(SongType.ALL, keyword)
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()

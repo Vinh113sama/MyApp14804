@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentFavoriteBinding
 import com.example.myapp.process.RetrofitClient
-import com.example.myapp.process.getsong.FavoriteRequest
 import com.example.myapp.process.getsong.SongAdapter
 import com.example.myapp.process.login.SongType
 import com.example.myapp.repository.SongRepository
@@ -99,12 +98,25 @@ class FavoriteFragment : Fragment() {
         binding.imgbtnBack.setOnClickListener {
             findNavController().popBackStack()
         }
-        adapter.setOnFavoriteClickListener { song ->
-            viewModel.toggleFavorite(song, true)
-        }
 
+        adapter.setOnFavoriteClickListener { song ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.clearFavoriteSong(song.id)
+            }
+            viewModel.refresh(SongType.FAVORITE)
+        }
         observeSongs()
         viewModel.loadSongs(SongType.FAVORITE)
+
+        findNavController().currentBackStackEntry?.savedStateHandle
+            ?.getLiveData<Boolean>("favoriteUpdated")
+            ?.observe(viewLifecycleOwner) { updated ->
+                if (updated == true) {
+                    viewModel.refresh(SongType.FAVORITE)
+                    findNavController().currentBackStackEntry?.savedStateHandle?.set("favoriteUpdated", false)
+                }
+            }
+
     }
 
     @OptIn(UnstableApi::class)

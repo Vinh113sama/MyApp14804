@@ -41,13 +41,18 @@ data class PlayedSong(
 @Parcelize
 data class FavoriteResponse(
     val data: List<Song>
-): Parcelable
+) : Parcelable
 
 data class FavoriteRequest(
-    val songId : Int
+    val songId: Int
 )
 
 data class BaseResponse(
     val success: Boolean,
     val message: String
+)
+
+data class UserResponse(
+    val name: String,
+    val id: Int
 )

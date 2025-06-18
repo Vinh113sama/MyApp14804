@@ -2,11 +2,13 @@ package com.example.myapp.repository
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.myapp.process.RetrofitClient
@@ -17,6 +19,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
 
     @SuppressLint("StaticFieldLeak")
     private val context = application.applicationContext
+
     private val _playlist = MutableLiveData<List<Song>>()
     val playlist: LiveData<List<Song>> get() = _playlist
 
@@ -26,10 +29,11 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     private val _isPlaying = MutableLiveData<Boolean>()
     val isPlaying: LiveData<Boolean> get() = _isPlaying
 
-
     private val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build()
     private var currentIndex = 0
     private var isShuffle = false
+
+    private val urlCache = mutableMapOf<Int, String>()
 
     init {
         exoPlayer.addListener(object : Player.Listener {
@@ -42,32 +46,63 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _isPlaying.value = isPlaying
             }
+
+            override fun onPlayerError(error: PlaybackException) {
+                Log.e("MusicPlayer", "Playback error: ${error.errorCodeName} - ${error.message}", error)
+            }
         })
     }
 
     fun setPlaylist(songs: List<Song>, startPosition: Int = 0) {
         _playlist.value = songs
         currentIndex = startPosition
+        preloadUrls(songs)  // preload all song URLs
         playSongAtIndex(currentIndex)
+    }
+
+    private fun preloadUrls(songs: List<Song>) {
+        viewModelScope.launch {
+            for (song in songs) {
+                if (!urlCache.containsKey(song.id)) {
+                    try {
+                        val response = RetrofitClient.apiService.getLink(song.id)
+                        val url = response.data.url.replace(" ", "%20")
+                        urlCache[song.id] = url
+                    } catch (_: Exception) {}
+                }
+            }
+        }
     }
 
     private fun playSongAtIndex(index: Int) {
         val list = _playlist.value ?: return
         if (index !in list.indices) return
+
         currentIndex = index
         val song = list[index]
         _currentSong.value = song
 
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.apiService.getLink(song.id)
-                val url = response.data.url.replace(" ", "%20")
-                exoPlayer.stop()
-                exoPlayer.clearMediaItems()
-                val mediaItem = MediaItem.fromUri(url)
-                exoPlayer.setMediaItem(mediaItem)
+                _isPlaying.value = false
+
+                val url = urlCache[song.id] ?: run {
+                    val response = RetrofitClient.apiService.getLink(song.id)
+                    val fetchedUrl = response.data.url.replace(" ", "%20")
+                    urlCache[song.id] = fetchedUrl
+                    fetchedUrl
+                }
+
+                val mediaItem = MediaItem.Builder()
+                    .setUri(url)
+                    .setTag(song.id)
+                    .build()
+
+                exoPlayer.setMediaItem(mediaItem, true)
                 exoPlayer.prepare()
                 exoPlayer.play()
+
+                preloadNextSong()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -77,7 +112,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     fun playNext() {
         val list = _playlist.value ?: return
         val nextIndex = if (isShuffle) {
-            (list.indices).random()
+            (list.indices - currentIndex).random()
         } else {
             (currentIndex + 1) % list.size
         }
@@ -91,7 +126,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun toggleShuffle() {
-       isShuffle = !isShuffle
+        isShuffle = !isShuffle
     }
 
     fun togglePlayPause() {
@@ -105,9 +140,6 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     fun rePlay() {
         playSongAtIndex(currentIndex)
     }
-    fun releasePlayer() {
-        exoPlayer.release()
-    }
 
     fun seekTo(positionMs: Long) {
         exoPlayer.seekTo(positionMs)
@@ -115,4 +147,30 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
 
     fun getPlayer(): ExoPlayer = exoPlayer
 
+    fun updateCurrentSong(song: Song) {
+        _currentSong.value = song
+    }
+
+    fun releasePlayer() {
+        exoPlayer.release()
+    }
+
+    private fun preloadNextSong() {
+        val list = _playlist.value ?: return
+        val nextIndex = if (isShuffle) {
+            (list.indices - currentIndex).random()
+        } else {
+            (currentIndex + 1) % list.size
+        }
+        val nextSong = list[nextIndex]
+        if (!urlCache.containsKey(nextSong.id)) {
+            viewModelScope.launch {
+                try {
+                    val response = RetrofitClient.apiService.getLink(nextSong.id)
+                    val url = response.data.url.replace(" ", "%20")
+                    urlCache[nextSong.id] = url
+                } catch (_: Exception) {}
+            }
+        }
+    }
 }

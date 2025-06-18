@@ -55,16 +55,19 @@ class SignInActivity : AppCompatActivity() {
                 try {
                     val response = RetrofitClient.authService.login(LoginRequest(username, password))
                     val token = response.token
-                    val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                    sharedPreferences.edit().putString("access_token", token).apply()
 
-                    val intent = Intent(this@SignInActivity, HomeActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                    if (token.isNotEmpty()) {
+                        val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
+                        sharedPreferences.edit().putString("access_token", token).apply()
 
+                        startActivity(Intent(this@SignInActivity, HomeActivity::class.java))
+                        finish()
+                    } else {
+                        Snackbar.make(btnLogin, "Không nhận được token từ server", Snackbar.LENGTH_SHORT).show()
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Snackbar.make(btnLogin, "Đăng nhập thất bại", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(btnLogin, "Đăng nhập thất bại hoặc lỗi kết nối", Snackbar.LENGTH_SHORT).show()
                 }
             }
         }

@@ -36,14 +36,23 @@
             android:id="@+id/action_playlistListFragment_to_playlistFragment"
             app:destination="@id/playlistFragment" />
         <action
-            android:id="@+id/action_playlistListFragment_to_playlistFragment2"
+            android:id="@+id/play_to_musicplay"
             app:destination="@id/playlistFragment" />
     </fragment>
     <fragment
         android:id="@+id/playlistFragment"
         android:name="com.example.myapp.fragment.PlaylistFragment"
         android:label="fragment_playlist"
-        tools:layout="@layout/fragment_playlist" />
+        tools:layout="@layout/fragment_playlist" >
+    <argument
+        android:name="playlistId"
+        app:argType="integer" />
+
+    <argument
+        android:name="playlistName"
+        app:argType="string" />
+    </fragment>
+
     <fragment
         android:id="@+id/historyFragment"
         android:name="com.example.myapp.fragment.HistoryFragment"

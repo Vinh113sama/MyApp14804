@@ -79,7 +79,7 @@
         android:layout_marginBottom="6dp"
         android:fontFamily="@font/sf_pro_display_heavy"
         android:letterSpacing="-0.02"
-        android:text="Music Lover"
+        android:text="@string/tv_title"
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold"

@@ -13,6 +13,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapp.R
 import com.example.myapp.activity.HomeActivity
 import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentSongListBinding
@@ -70,6 +71,10 @@ class SongListFragment : Fragment() {
                 }
             }
         })
+
+        binding.imgbtnSearch.setOnClickListener {
+            findNavController().navigate(R.id.action_songListFragment_to_searchFragment)
+        }
 
         setupRecyclerView()
         observeSongs()

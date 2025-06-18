@@ -79,31 +79,15 @@
         app:layout_constraintTop_toTopOf="@+id/guideline7"
         app:srcCompat="@drawable/ic_replay" />
 
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/imgbtn_content"
-        android:scrollHorizontally="true"
-        app:layout_constraintBottom_toTopOf="@+id/img_song"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.958"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.103"
-        app:srcCompat="@drawable/ic_more_vert"
-        tools:ignore="DuplicateSpeakableTextCheck,TouchTargetSizeCheck" />
-
     <TextView
         android:id="@+id/tv_time_max"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/label_start_time"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="@+id/seekBar"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar" />
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        tools:ignore="TextContrastCheck" />
 
     <TextView
         android:id="@+id/tv_time_current"
@@ -111,10 +95,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:text="@string/label_start_time"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="@+id/seekBar"
         app:layout_constraintTop_toBottomOf="@+id/seekBar"
-        tools:ignore="RelativeOverlap" />
+        tools:ignore="RelativeOverlap,TextContrastCheck" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
@@ -172,19 +156,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.838" />
 
-    <ImageButton
-        android:id="@+id/imgbtn_favorite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/imgbtn_content"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline5"
-        app:layout_constraintTop_toBottomOf="@+id/img_song"
-        app:srcCompat="@drawable/ic_add_favorite"
-        tools:ignore="TouchTargetSizeCheck" />
-
     <TextView
         android:id="@+id/tv_song_name"
         android:layout_width="0dp"
@@ -192,16 +163,17 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
-
         android:gravity="center"
         android:text="@string/text_artist_name"
+        android:textColor="@color/white"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/tv_artist_name"
         app:layout_constraintEnd_toStartOf="@+id/guideline5"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toBottomOf="@+id/seekBar"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="1.0"
+        tools:ignore="TextContrastCheck" />
 
     <TextView
         android:id="@+id/tv_artist_name"
@@ -211,7 +183,6 @@
         android:layout_marginTop="4dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="28dp"
-
         android:ellipsize="marquee"
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -220,26 +191,44 @@
         android:scrollHorizontally="true"
         android:singleLine="true"
         android:text="@string/text_song_name"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/imgbtn_play"
         app:layout_constraintEnd_toStartOf="@+id/guideline5"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toBottomOf="@+id/tv_song_name" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_song_name"
+        tools:ignore="TextContrastCheck" />
 
     <ImageButton
-        android:id="@+id/imgbtn_back"
+        android:id="@+id/imgbtn_down"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/imgbtn_content"
         app:layout_constraintBottom_toTopOf="@+id/img_song"
-        app:layout_constraintEnd_toStartOf="@+id/imageButton2"
-        app:layout_constraintHorizontal_bias="0.018"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.19"
-        app:srcCompat="@drawable/ic_back"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/ic_down"
+        app:tint="@color/white"
         tools:ignore="TouchTargetSizeCheck" />
+
+    <ImageButton
+        android:id="@+id/imgbtn_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toTopOf="@+id/img_song"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.951"
+        app:layout_constraintStart_toEndOf="@+id/imgbtn_down"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/ic_add_favorite"
+        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

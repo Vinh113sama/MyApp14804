@@ -1,5 +1,14 @@
 package com.example.myapp.process.getsong
 
+import com.example.myapp.process.getplaylist.AddSongResponse
+import com.example.myapp.process.getplaylist.AddSongToPlaylistRequest
+import com.example.myapp.process.getplaylist.CreatePlaylistRequest
+import com.example.myapp.process.getplaylist.PlaylistListResponse
+import com.example.myapp.process.getplaylist.PlaylistResponse
+import com.example.myapp.process.getplaylist.PlaylistSongsResponse
+import com.example.myapp.process.getplaylist.RemoveSongFromPlaylistRequest
+import com.example.myapp.process.getplaylist.RemoveSongResponse
+import com.example.myapp.process.getplaylist.UpdatePlaylistRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -25,19 +34,22 @@ interface ApiService {
     suspend fun getHistorySongs(
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 10
-    ) : HistoryResponse
+    ): HistoryResponse
 
     @GET("api/song/favorite")
     suspend fun getFavoriteSongs(
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 10
-    ) : FavoriteResponse
+    ): FavoriteResponse
 
     @POST("api/song/favorite")
     suspend fun postFavoriteSong(@Body request: FavoriteRequest): Response<BaseResponse>
 
     @HTTP(method = "DELETE", path = "api/song/favorite", hasBody = true)
     suspend fun deleteFavoriteSong(@Body request: FavoriteRequest): Response<BaseResponse>
+
+    @GET("api/user")
+    suspend fun getUserInfor(): UserResponse
 
     @POST("api/playlist")
     suspend fun createPlaylist(@Body request: CreatePlaylistRequest): PlaylistResponse

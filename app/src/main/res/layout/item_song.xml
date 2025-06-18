@@ -6,9 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
-    card_view:cardCornerRadius="12dp"
+    style="@style/AppleNavigationItemShape"
+    card_view:cardCornerRadius="15dp"
     card_view:cardElevation="4dp"
-    android:background="@color/textColorSecondary">
+    android:background="@color/black">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -35,20 +36,24 @@
             android:layout_marginStart="16dp"
             android:text="@string/text_song_name"
             android:textStyle="bold"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/img_song"
             app:layout_constraintTop_toTopOf="@id/img_song"
-            app:layout_constraintEnd_toEndOf="parent" />
+            tools:ignore="TextContrastCheck" />
 
         <TextView
             android:id="@+id/tv_artist_name"
-            android:layout_width="245dp"
-            android:layout_height="22dp"
+            android:layout_width="228dp"
+            android:layout_height="23dp"
             android:layout_marginStart="16dp"
             android:text="@string/text_artist_name"
+            android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/img_song"
             app:layout_constraintTop_toBottomOf="@id/tv_song_name"
-            card_view:layout_constraintHorizontal_bias="0.0" />
+            card_view:layout_constraintHorizontal_bias="0.0"
+            tools:ignore="TextSizeCheck,TextContrastCheck" />
 
         <TextView
             android:id="@+id/tv_duration"
@@ -56,9 +61,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="@string/label_start_time"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/img_song"
             app:layout_constraintTop_toBottomOf="@id/tv_artist_name"
-            app:layout_constraintEnd_toEndOf="parent" />
+            tools:ignore="TextContrastCheck" />
 
         <ImageButton
             android:id="@+id/imgbtn_favorite"
@@ -66,12 +73,11 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/add_favorite"
-            android:tint="#673AB7"
             app:srcCompat="@drawable/ic_delete_favorite"
             card_view:layout_constraintBottom_toTopOf="@+id/tv_duration"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintStart_toEndOf="@+id/tv_artist_name"
             card_view:layout_constraintTop_toTopOf="@+id/tv_artist_name"
-            tools:ignore="TouchTargetSizeCheck,UseAppTint" />
+            tools:ignore="TouchTargetSizeCheck,UseAppTint,ImageContrastCheck" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

@@ -6,21 +6,31 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.animation.LinearInterpolator
+import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.Glide
 import com.example.myapp.R
 import com.example.myapp.databinding.ActivityHomeBinding
+import com.example.myapp.databinding.LayoutTopInterfaceBinding
 import com.example.myapp.databinding.MiniPlayerBinding
+import com.example.myapp.process.RetrofitClient
+import com.example.myapp.repository.SongRepository
+import com.example.myapp.repository.SongViewModel
 import com.example.myapp.util.AppViewModelProvider
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.launch
 
+@Suppress("UNCHECKED_CAST")
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeBinding
@@ -33,6 +43,7 @@ class HomeActivity : AppCompatActivity() {
     private var rotationAnimator: ObjectAnimator? = null
     private var currentRotation = 0f
 
+
     @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,10 +53,28 @@ class HomeActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.miniPlayerContainer) { view, insets ->
             insets
         }
-        miniPlayerBinding = MiniPlayerBinding.bind(binding.miniPlayerContainer)
+
         initViews()
+
+        val headerBinding = LayoutTopInterfaceBinding.bind(navView.getHeaderView(0))
+        lifecycleScope.launch {
+            val name = viewModel.getuserInformation().name
+            headerBinding.tvUserName.text = name
+        }
+
+        miniPlayerBinding = MiniPlayerBinding.bind(binding.miniPlayerContainer)
+
         setupNavigationMenu()
         setupMiniPlayer()
+    }
+
+    private val viewModel: SongViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = SongRepository(RetrofitClient.apiService)
+                return SongViewModel(repository) as T
+            }
+        }
     }
 
     @OptIn(UnstableApi::class)
@@ -83,7 +112,19 @@ class HomeActivity : AppCompatActivity() {
         }
 
         musicViewModel.isPlaying.observe(this) { isPlaying ->
+            processFavorite()
             updatePlayPauseIcon(isPlaying)
+        }
+
+        miniPlayerBinding.imgbtnFavorite.setOnClickListener {
+            val song = musicViewModel.currentSong.value
+            if (song != null) {
+                viewModel.toggleFavorite(song, onComplete = {
+                    processFavorite()
+                    val navController = navHostFragment.navController
+                    navController.currentBackStackEntry?.savedStateHandle?.set("favoriteUpdated", true)
+                })
+            }
         }
     }
 
@@ -112,6 +153,11 @@ class HomeActivity : AppCompatActivity() {
                     drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }
+                R.id.nav_playlist -> {
+                    navController.navigate(R.id.playlistListFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
                 else -> false
             }
         }
@@ -128,6 +174,7 @@ class HomeActivity : AppCompatActivity() {
         if (song != null) {
             miniPlayerBinding.tvMiniTitle.text = song.title
             miniPlayerBinding.tvMiniArtist.text = song.artist.name
+            processFavorite()
             Glide.with(this)
                 .load(song.imageUrl)
                 .placeholder(R.drawable.image_no_available)
@@ -162,6 +209,22 @@ class HomeActivity : AppCompatActivity() {
             rotationAnimator?.start()
         } else {
             rotationAnimator?.pause()
+        }
+    }
+
+    private fun isFavorite(isFav: Boolean) {
+        if (isFav) {
+            miniPlayerBinding.imgbtnFavorite.setImageResource(R.drawable.ic_delete_favorite)
+        } else {
+           miniPlayerBinding.imgbtnFavorite.setImageResource(R.drawable.ic_add_favorite)
+        }
+    }
+
+    private fun processFavorite() {
+        val song = musicViewModel.currentSong.value ?: return
+        lifecycleScope.launch {
+            val isFav = viewModel.isFavorite(song.id)
+            isFavorite(isFav)
         }
     }
 
