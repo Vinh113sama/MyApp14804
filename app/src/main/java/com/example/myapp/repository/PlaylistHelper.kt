@@ -62,7 +62,7 @@ object PlaylistHelper {
                     adapter.submitList(playlists)
                 }
 
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 binding.layoutEmpty.visibility = View.VISIBLE
                 binding.rcPlaylists.visibility = View.GONE
             }
