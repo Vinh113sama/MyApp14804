@@ -21,7 +21,7 @@ import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.Song
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
-import com.example.myapp.util.AppViewModelProvider
+import com.example.myapp.repository.AppViewModelProvider
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.getValue
@@ -55,7 +55,7 @@ class PlaySongActivity : AppCompatActivity() {
 
 
         if (!intent.getBooleanExtra("fromMiniPlayer", false)) {
-            musicViewModel.setPlaylist(playlist, position)
+            musicViewModel.setPlaylist(playlist, position, autoPlay = true)
         }
         observeViewModel()
         setupPlayerListener()
@@ -81,6 +81,9 @@ class PlaySongActivity : AppCompatActivity() {
                 startOrStopRotation(musicViewModel.getPlayer().isPlaying)
             }
         }
+        musicViewModel.isPlaying.observe(this) { isPlaying ->
+            updatePlayPauseIcon(isPlaying)
+        }
     }
 
     private fun setupPlayerListener() {
@@ -101,6 +104,7 @@ class PlaySongActivity : AppCompatActivity() {
         processFavorite()
         Glide.with(this)
             .load(song.imageUrl)
+            .override(600,600)
             .placeholder(R.drawable.ic_music_note)
             .error(R.drawable.img_avatar_default)
             .into(binding.imgSong)
@@ -119,10 +123,6 @@ class PlaySongActivity : AppCompatActivity() {
 
         binding.imgbtnPlay.setOnClickListener {
             musicViewModel.togglePlayPause()
-            binding.imgbtnPlay.setImageResource(
-                if (musicViewModel.getPlayer().isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-            )
-            startOrStopRotation(musicViewModel.getPlayer().isPlaying)
         }
 
 
@@ -233,6 +233,13 @@ class PlaySongActivity : AppCompatActivity() {
             val isFav = viewModel.isFavorite(song.id)
             isFavorite(isFav)
         }
+    }
+
+    private fun updatePlayPauseIcon(isPlaying: Boolean) {
+        binding.imgbtnPlay.setImageResource(
+            if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+        )
+        startOrStopRotation(isPlaying)
     }
 
     override fun onDestroy() {

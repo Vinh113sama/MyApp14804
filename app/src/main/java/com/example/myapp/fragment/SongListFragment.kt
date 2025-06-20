@@ -20,6 +20,7 @@ import com.example.myapp.databinding.FragmentSongListBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.SongAdapter
 import com.example.myapp.process.login.SongType
+import com.example.myapp.repository.PlaylistHelper
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.launch
@@ -103,6 +104,14 @@ class SongListFragment : Fragment() {
                 putExtra("position", position)
             }
             startActivity(intent)
+        }
+
+        adapter.setOnMoreClickListener { song ->
+            PlaylistHelper.showAddToPlaylistDialog(
+                fragment = this,
+                song = song,
+                viewModel = viewModel
+            )
         }
     }
 

@@ -60,7 +60,7 @@ interface ApiService {
         @Body request: UpdatePlaylistRequest
     ): PlaylistResponse
 
-    @DELETE("api/playlist/{playlistId}")
+    @HTTP(method = "DELETE", path = "api/playlist/{playlistId}", hasBody = false)
     suspend fun deletePlaylist(@Path("playlistId") playlistId: Int): PlaylistResponse
 
     @POST("api/playlist/{playlistId}")
@@ -84,4 +84,7 @@ interface ApiService {
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 10
     ): PlaylistSongsResponse
+
+    @POST("api/auth/logout")
+    suspend fun logout()
 }

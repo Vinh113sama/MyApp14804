@@ -13,53 +13,41 @@
         android:id="@+id/imgPlaylist"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginTop="4dp"
         android:src="@drawable/ic_music_note"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/primary_color"
         tools:ignore="ContentDescription" />
 
+    <ImageButton
+        android:id="@+id/imgbtn_edit"
+        android:layout_width="18dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="60dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/imgbtn_content"
+        android:src="@drawable/ic_edit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/gray"
+        tools:ignore="TouchTargetSizeCheck" />
+
     <TextView
         android:id="@+id/tvPlaylistName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/imgbtnEdit"
         app:layout_constraintStart_toEndOf="@id/imgPlaylist"
         app:layout_constraintTop_toTopOf="@id/imgPlaylist"
-        tools:text="My Playlist" />
-
-    <TextView
-        android:id="@+id/tvCreatedDate"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="8dp"
-        android:textColor="@color/gray"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toStartOf="@id/imgbtnEdit"
-        app:layout_constraintStart_toEndOf="@id/imgPlaylist"
-        app:layout_constraintTop_toBottomOf="@id/tvPlaylistName"
-        tools:text="@string/created_date" />
-
-    <ImageButton
-        android:id="@+id/imgbtnEdit"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_more_vert"
-        app:layout_constraintBottom_toBottomOf="@id/imgPlaylist"
         app:layout_constraintEnd_toStartOf="@id/imgbtnDelete"
-        app:layout_constraintTop_toTopOf="@id/imgPlaylist"
-        app:tint="@color/gray"
-        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+        tools:text="My Playlist" />
 
     <ImageButton
         android:id="@+id/imgbtnDelete"

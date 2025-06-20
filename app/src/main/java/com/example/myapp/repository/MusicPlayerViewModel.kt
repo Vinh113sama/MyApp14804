@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -53,12 +54,13 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
         })
     }
 
-    fun setPlaylist(songs: List<Song>, startPosition: Int = 0) {
+    fun setPlaylist(songs: List<Song>, startPosition: Int = 0, autoPlay: Boolean = true) {
         _playlist.value = songs
         currentIndex = startPosition
-        preloadUrls(songs)  // preload all song URLs
-        playSongAtIndex(currentIndex)
+        preloadUrls(songs)
+        playSongAtIndex(currentIndex, autoPlay)
     }
+
 
     private fun preloadUrls(songs: List<Song>) {
         viewModelScope.launch {
@@ -74,7 +76,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    private fun playSongAtIndex(index: Int) {
+    private fun playSongAtIndex(index: Int, autoPlay: Boolean = true) {
         val list = _playlist.value ?: return
         if (index !in list.indices) return
 
@@ -95,14 +97,20 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
 
                 val mediaItem = MediaItem.Builder()
                     .setUri(url)
+                    .setMimeType(MimeTypes.APPLICATION_M3U8)
                     .setTag(song.id)
                     .build()
 
                 exoPlayer.setMediaItem(mediaItem, true)
                 exoPlayer.prepare()
-                exoPlayer.play()
+
+                if (autoPlay) {
+                    exoPlayer.playWhenReady = true
+                    exoPlayer.play()
+                }
 
                 preloadNextSong()
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -167,8 +175,8 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
             viewModelScope.launch {
                 try {
                     val response = RetrofitClient.apiService.getLink(nextSong.id)
-                    val url = response.data.url.replace(" ", "%20")
-                    urlCache[nextSong.id] = url
+                   // val url = response.data.url.replace(" ", "%20")
+                    urlCache[nextSong.id] = response.data.url
                 } catch (_: Exception) {}
             }
         }

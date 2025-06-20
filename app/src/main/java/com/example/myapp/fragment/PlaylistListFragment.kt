@@ -1,26 +1,33 @@
 package com.example.myapp.fragment
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapp.R
+import com.example.myapp.databinding.DialogAddPlaylistBinding
+import com.example.myapp.databinding.DialogDeleteConfirmBinding
+import com.example.myapp.databinding.DialogRenameBinding
 import com.example.myapp.databinding.FragmentPlaylistListBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getplaylist.PlaylistAdapter
+import com.example.myapp.process.getplaylist.PlaylistResponse
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.launch
 
+@Suppress("UNCHECKED_CAST")
 class PlaylistListFragment : Fragment() {
     private var _binding: FragmentPlaylistListBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: PlaylistAdapter
-
     private val viewModel: SongViewModel by viewModels {
         object : androidx.lifecycle.ViewModelProvider.Factory {
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
@@ -44,6 +51,17 @@ class PlaylistListFragment : Fragment() {
         setupRecyclerView()
         setupUI()
         loadPlaylists()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.errorMessage.collect { error ->
+                if (error == null) {
+                    loadPlaylists()
+                } else {
+                    Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+                    viewModel.clearError()
+                }
+            }
+        }
     }
 
     private fun setupUI() {
@@ -64,22 +82,117 @@ class PlaylistListFragment : Fragment() {
         }
 
         adapter.setOnEditClickListener { playlist ->
+            showRenameDialog(playlist)
         }
 
         adapter.setOnDeleteClickListener { playlist ->
+            showDeleteDialog(playlist)
+        }
+
+        binding.imgbtnAdd.setOnClickListener {
+            showAddPlaylistDialog()
         }
     }
 
     private fun loadPlaylists() {
         lifecycleScope.launch {
             try {
-                val userId = viewModel.getuserInformation().id
+                val userId = viewModel.getUserInformation().id
                 val playlists = viewModel.getPlaylist(userId)
                 adapter.submitList(playlists)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun showRenameDialog(playlist: PlaylistResponse) {
+        val dialogBinding = DialogRenameBinding.inflate(layoutInflater)
+        val editText = dialogBinding.edtPlaylistName
+        editText.setText(playlist.name)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnSave.setOnClickListener {
+            val newName = editText.text.toString().trim()
+            if (newName.isNotEmpty()) {
+                viewModel.updatePlaylistName(playlist.id, newName)
+                dialog.dismiss()
+            } else {
+                Toast.makeText(requireContext(), "Name cannot be empty", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dialog.show()
+    }
+
+
+    private fun showAddPlaylistDialog() {
+        val dialogBinding = DialogAddPlaylistBinding.inflate(layoutInflater)
+        val editText = dialogBinding.edtPlaylistName
+
+        dialogBinding.tv.text = getString(R.string.create_playlist_title)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnCreate.setOnClickListener {
+            val name = editText.text.toString().trim()
+            if (name.isNotEmpty()) {
+                viewModel.createPlaylist(
+                    name = name,
+                    onSuccess = {
+                        Toast.makeText(requireContext(), "Created", Toast.LENGTH_SHORT).show()
+                        loadPlaylists()
+                        dialog.dismiss()
+                    },
+                    onError = { msg ->
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            } else {
+                Toast.makeText(requireContext(), "Name cannot be empty", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun showDeleteDialog(playlist: PlaylistResponse) {
+        val dialogBinding = DialogDeleteConfirmBinding.inflate(layoutInflater)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.tvMessage.text = getString(R.string.delete_playlist_message, playlist.name)
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnDelete.setOnClickListener {
+            viewModel.deletePlaylist(
+                playlist.id,
+                onSuccess = {
+                    Toast.makeText(requireContext(), "Deleted", Toast.LENGTH_SHORT).show()
+                    loadPlaylists()
+                    dialog.dismiss()
+                }
+            )
+        }
+        dialog.show()
     }
 
     override fun onDestroyView() {

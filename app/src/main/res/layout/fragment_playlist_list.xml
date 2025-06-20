@@ -3,52 +3,67 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rc_playlist_list"
-        android:layout_width="404dp"
-        android:layout_height="670dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ic_fragment_name"
-        tools:ignore="SpeakableTextPresentCheck"
-        tools:listitem="@layout/item_playlist" />
-
-    <TextView
-        android:id="@+id/ic_fragment_name"
-        android:layout_width="99dp"
-        android:layout_height="46dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/play_list"
-        android:textColor="@color/white"
-        android:textSize="@dimen/define_dimen_24"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/rc_playlist_list"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.444"
-        app:layout_constraintStart_toEndOf="@+id/imgbtn_back"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.666"
-        tools:ignore="SpUsage,TextSizeCheck" />
 
     <ImageButton
         android:id="@+id/imgbtn_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/imgbtn_content"
-        app:layout_constraintBottom_toTopOf="@+id/rc_playlist_list"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.296"
         app:srcCompat="@drawable/ic_back"
         app:tint="@color/white"
         tools:ignore="TouchTargetSizeCheck" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/ic_fragment_name"
+        android:layout_width="344dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:foregroundGravity="center"
+        android:gravity="center"
+        android:text="@string/play_list"
+        android:textColor="@color/white"
+        android:textSize="@dimen/define_dimen_24"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpUsage,TextSizeCheck" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rc_playlist_list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/imgbtn_add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ic_fragment_name"
+        tools:ignore="SpeakableTextPresentCheck"
+        tools:listitem="@layout/item_playlist" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/imgbtn_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/imgbtn_content"
+        android:foregroundGravity="center"
+        app:backgroundTint="@color/red"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_add"
+        app:tint="@android:color/white" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

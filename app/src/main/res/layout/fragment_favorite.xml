@@ -7,9 +7,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rc_favorite_songs"
-        android:layout_width="392dp"
-        android:layout_height="673dp"
-
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,19 +18,20 @@
 
     <TextView
         android:id="@+id/ic_fragment_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="31dp"
+        android:gravity="center"
         android:text="@string/favorite_songs"
+        android:textColor="@color/white"
         android:textSize="@dimen/define_dimen_24"
         android:textStyle="bold"
-        android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/btn_play_all"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btn_play_all"
         app:layout_constraintHorizontal_bias="0.421"
-        app:layout_constraintStart_toEndOf="@+id/imgbtn_back"
+        app:layout_constraintStart_toStartOf="@+id/btn_play_all"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.666"
-        tools:ignore="SpUsage,TextSizeCheck" />
+        tools:ignore="SpUsage,TextSizeCheck,TextContrastCheck" />
 
     <ImageButton
         android:id="@+id/imgbtn_back"
@@ -51,15 +51,17 @@
     <Button
         android:id="@+id/btn_play_all"
         android:layout_width="wrap_content"
-        android:textColor="@color/white"
         android:layout_height="wrap_content"
         android:layout_marginTop="56dp"
-        android:text="@string/btn_play_all"
         android:backgroundTint="@color/blue"
+        android:gravity="center"
+        android:text="@string/btn_play_all"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="TextContrastCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

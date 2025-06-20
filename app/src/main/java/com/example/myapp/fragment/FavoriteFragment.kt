@@ -102,8 +102,8 @@ class FavoriteFragment : Fragment() {
         adapter.setOnFavoriteClickListener { song ->
             viewLifecycleOwner.lifecycleScope.launch {
                 viewModel.clearFavoriteSong(song.id)
+                viewModel.refresh(SongType.FAVORITE)
             }
-            viewModel.refresh(SongType.FAVORITE)
         }
         observeSongs()
         viewModel.loadSongs(SongType.FAVORITE)

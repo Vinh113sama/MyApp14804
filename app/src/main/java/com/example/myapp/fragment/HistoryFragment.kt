@@ -19,13 +19,14 @@ import com.example.myapp.databinding.FragmentHistoryBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.SongAdapter
 import com.example.myapp.process.login.SongType
+import com.example.myapp.repository.PlaylistHelper
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
-@Suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class HistoryFragment : Fragment() {
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
@@ -58,12 +59,29 @@ class HistoryFragment : Fragment() {
         binding.rcHistorySongs.layoutManager = LinearLayoutManager(requireContext())
         binding.rcHistorySongs.adapter = adapter
 
+        adapter.setOnMoreClickListener { song ->
+            PlaylistHelper.showAddToPlaylistDialog(
+                fragment = this,
+                song = song,
+                viewModel = viewModel
+            )
+        }
+
         adapter.setOnItemClickListener { song, position ->
             val intent = Intent(requireContext(), PlaySongActivity::class.java)
             intent.putParcelableArrayListExtra("playlist", ArrayList(adapter.currentList))
             intent.putExtra("position", position)
             startActivity(intent)
         }
+
+        adapter.setOnMoreClickListener { song ->
+            PlaylistHelper.showAddToPlaylistDialog(
+                fragment = this,
+                song = song,
+                viewModel = viewModel
+            )
+        }
+
         binding.btnPlayAll.setOnClickListener {
             val songs = adapter.currentList
             if (songs.isNotEmpty()) {
@@ -101,7 +119,6 @@ class HistoryFragment : Fragment() {
     }
 
 
-
     private fun observeSongs() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.songs.collectLatest { songList ->
@@ -114,6 +131,7 @@ class HistoryFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
     override fun onResume() {
         super.onResume()
         viewModel.refresh(SongType.HISTORY)

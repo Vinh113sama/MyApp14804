@@ -2,12 +2,15 @@ package com.example.myapp.activity
 
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -21,12 +24,13 @@ import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.Glide
 import com.example.myapp.R
 import com.example.myapp.databinding.ActivityHomeBinding
+import com.example.myapp.databinding.DialogLogoutBinding
 import com.example.myapp.databinding.LayoutTopInterfaceBinding
 import com.example.myapp.databinding.MiniPlayerBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
-import com.example.myapp.util.AppViewModelProvider
+import com.example.myapp.repository.AppViewModelProvider
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.launch
 
@@ -43,7 +47,6 @@ class HomeActivity : AppCompatActivity() {
     private var rotationAnimator: ObjectAnimator? = null
     private var currentRotation = 0f
 
-
     @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,8 +61,8 @@ class HomeActivity : AppCompatActivity() {
 
         val headerBinding = LayoutTopInterfaceBinding.bind(navView.getHeaderView(0))
         lifecycleScope.launch {
-            val name = viewModel.getuserInformation().name
-            headerBinding.tvUserName.text = name
+            val result = viewModel.getUserInformation()
+            headerBinding.tvUserName.text = result.name
         }
 
         miniPlayerBinding = MiniPlayerBinding.bind(binding.miniPlayerContainer)
@@ -85,6 +88,7 @@ class HomeActivity : AppCompatActivity() {
                 miniPlayerBinding.tvMiniArtist.text = song.artist.name
                 Glide.with(this)
                     .load(song.imageUrl)
+                    .override(600, 600)
                     .placeholder(R.drawable.image_no_available)
                     .error(R.drawable.image_no_available)
                     .into(miniPlayerBinding.imgMiniSong)
@@ -122,7 +126,10 @@ class HomeActivity : AppCompatActivity() {
                 viewModel.toggleFavorite(song, onComplete = {
                     processFavorite()
                     val navController = navHostFragment.navController
-                    navController.currentBackStackEntry?.savedStateHandle?.set("favoriteUpdated", true)
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        "favoriteUpdated",
+                        true
+                    )
                 })
             }
         }
@@ -131,7 +138,8 @@ class HomeActivity : AppCompatActivity() {
     private fun initViews() {
         drawerLayout = findViewById(R.id.drawer_layout)
         navView = findViewById(R.id.nav_view)
-        navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
     }
 
@@ -143,25 +151,42 @@ class HomeActivity : AppCompatActivity() {
                     drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }
+
                 R.id.nav_home -> {
                     navController.navigate(R.id.songListFragment)
                     drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }
+
                 R.id.nav_favorite -> {
                     navController.navigate(R.id.favoriteFragment)
                     drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }
+
                 R.id.nav_playlist -> {
                     navController.navigate(R.id.playlistListFragment)
                     drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+
+                R.id.nav_signout -> {
+                    showLogoutDialog(
+                        context = this, // hoặc requireContext() nếu trong Fragment
+                        onConfirm = {
+                            viewModel.logout()
+                            val intent = Intent(this, SignInActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                        }
+                    )
                     true
                 }
                 else -> false
             }
         }
     }
+
     private fun updatePlayPauseIcon(isPlaying: Boolean) {
         miniPlayerBinding.imgbtnPlayPause.setImageResource(
             if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
@@ -193,7 +218,12 @@ class HomeActivity : AppCompatActivity() {
 
     private fun startOrStopRotation(isPlaying: Boolean) {
         if (rotationAnimator == null) {
-            rotationAnimator = ObjectAnimator.ofFloat(miniPlayerBinding.imgMiniSong, View.ROTATION, currentRotation, currentRotation + 360f).apply {
+            rotationAnimator = ObjectAnimator.ofFloat(
+                miniPlayerBinding.imgMiniSong,
+                View.ROTATION,
+                currentRotation,
+                currentRotation + 360f
+            ).apply {
                 duration = 10000
                 interpolator = LinearInterpolator()
                 repeatCount = ValueAnimator.INFINITE
@@ -216,7 +246,7 @@ class HomeActivity : AppCompatActivity() {
         if (isFav) {
             miniPlayerBinding.imgbtnFavorite.setImageResource(R.drawable.ic_delete_favorite)
         } else {
-           miniPlayerBinding.imgbtnFavorite.setImageResource(R.drawable.ic_add_favorite)
+            miniPlayerBinding.imgbtnFavorite.setImageResource(R.drawable.ic_add_favorite)
         }
     }
 
@@ -228,6 +258,29 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun showLogoutDialog(
+        context: Context,
+        onConfirm: () -> Unit,
+        onCancel: (() -> Unit)? = null
+    ) {
+        val binding = DialogLogoutBinding.inflate(LayoutInflater.from(context))
+        val dialog = AlertDialog.Builder(context)
+            .setView(binding.root)
+            .setCancelable(false)
+            .create()
+
+        binding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+            onCancel?.invoke()
+        }
+
+        binding.btnLogout.setOnClickListener {
+            dialog.dismiss()
+            onConfirm()
+        }
+
+        dialog.show()
+    }
     override fun onResume() {
         super.onResume()
         miniPlayerBinding.root.visibility = View.VISIBLE

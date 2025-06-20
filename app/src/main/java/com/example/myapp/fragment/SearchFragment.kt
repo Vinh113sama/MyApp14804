@@ -21,6 +21,7 @@ import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentSearchBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.SongAdapter
+import com.example.myapp.repository.PlaylistHelper
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -74,6 +75,13 @@ class SearchFragment : Fragment() {
             intent.putParcelableArrayListExtra("playlist", ArrayList(adapter.currentList))
             intent.putExtra("position", position)
             startActivity(intent)
+        }
+        adapter.setOnMoreClickListener { song ->
+            PlaylistHelper.showAddToPlaylistDialog(
+                fragment = this,
+                song = song,
+                viewModel = viewModel
+            )
         }
     }
 

@@ -17,6 +17,7 @@ import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentPlaylistBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.SongAdapter
+import com.example.myapp.process.login.SongType
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -61,13 +62,17 @@ class PlaylistFragment : Fragment() {
         observePlaylistSongs()
         viewModel.loadSongsInPlaylist(playlistId)
 
+        adapter.setOnFavoriteClickListener  { song ->
+            viewModel.deletePlaylistSong(playlistId, song.id)
+        }
+
         binding.imgbtnBack.setOnClickListener {
             findNavController().popBackStack()
         }
     }
 
     private fun setupRecyclerView() {
-        adapter = SongAdapter()
+        adapter = SongAdapter(false, true)
         binding.rcPlaylistSongs.layoutManager = LinearLayoutManager(requireContext())
         binding.rcPlaylistSongs.adapter = adapter
 

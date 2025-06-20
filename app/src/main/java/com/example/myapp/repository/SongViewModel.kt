@@ -26,11 +26,19 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
     val isLastPage: StateFlow<Boolean> get() = _isLastPage
     private val _searchResults = MutableStateFlow<List<Song>>(emptyList())
     val searchResults: StateFlow<List<Song>> get() = _searchResults
-
     private val _playlistSongs = MutableStateFlow<List<Song>>(emptyList())
     val playlistSongs: StateFlow<List<Song>> get() = _playlistSongs
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> get() = _errorMessage
 
-    fun loadSongs(type: SongType, keyword: String? = null, isRefresh: Boolean = false) {
+
+    @OptIn(UnstableApi::class)
+    fun loadSongs(
+        type: SongType,
+        keyword: String? = null,
+        isRefresh: Boolean = false,
+        playlistId: Int? = null
+    ) {
         if (_isLoading.value || _isLastPage.value) return
         _isLoading.value = true
 
@@ -45,7 +53,10 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
                     SongType.ALL -> repository.getSongs(keyword, currentPage)
                     SongType.FAVORITE -> repository.getFavoriteSongs(currentPage)
                     SongType.HISTORY -> repository.getHistorySongs(currentPage)
-                    SongType.PLAYLISTSONG -> repository.getPlaylistSongs(playlistId = 1, currentPage)
+                    SongType.PLAYLISTSONG -> {
+                        val id = playlistId ?: return@launch
+                        repository.getPlaylistSongs(id, currentPage)
+                    }
                 }
                 val updatedList = if (isRefresh || currentPage == 1) {
                     result
@@ -53,7 +64,10 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
                     _songs.value + result
                 }
                 _songs.value = updatedList
-
+                Log.d(
+                    "Pagination",
+                    "Page: $currentPage, ResultSize: ${result.size}, TotalItems: ${_songs.value.size}"
+                )
                 if (result.isEmpty()) _isLastPage.value = true
                 else currentPage++
 
@@ -65,7 +79,11 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
         }
     }
 
-    fun toggleFavorite(song: Song, isFromFavoriteScreen: Boolean = false, onComplete: (() -> Unit)? = null) {
+    fun toggleFavorite(
+        song: Song,
+        isFromFavoriteScreen: Boolean = false,
+        onComplete: (() -> Unit)? = null
+    ) {
         viewModelScope.launch {
             try {
                 if (song.isFavorite) {
@@ -91,10 +109,10 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
         }
     }
 
-    fun refresh(type: SongType, keyword: String? = null) {
+    fun refresh(type: SongType, keyword: String? = null, playlistId: Int? = null) {
         currentPage = 1
         _isLastPage.value = false
-        loadSongs(type, keyword = keyword, isRefresh = true)
+        loadSongs(type, keyword = keyword, isRefresh = true, playlistId = playlistId)
     }
 
     fun clearSongs() {
@@ -105,11 +123,11 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
         return repository.deleteFavorite(id)
     }
 
-    suspend fun getuserInformation(): UserResponse {
+    suspend fun getUserInformation(): UserResponse {
         return repository.getUserInfor()
     }
 
-    suspend fun isFavorite(songId : Int): Boolean {
+    suspend fun isFavorite(songId: Int): Boolean {
         val result = repository.getFavoriteSongs(currentPage, 30)
         return result.any { it.id == songId }
     }
@@ -126,7 +144,7 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
         }
     }
 
-    suspend fun getPlaylist(userId : Int): List<PlaylistResponse> {
+    suspend fun getPlaylist(userId: Int): List<PlaylistResponse> {
         return repository.getPlaylistList(userId)
     }
 
@@ -138,6 +156,102 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    fun deletePlaylistSong(playlistId: Int, songId: Int) {
+        viewModelScope.launch {
+            repository.deletePlaylistSong(playlistId, songId)
+
+            loadSongsInPlaylist(playlistId)
+        }
+    }
+
+    fun addSongToPlaylist(
+        playlistId: Int,
+        songId: Int,
+        onSuccess: (() -> Unit)? = null,
+        onError: ((String) -> Unit)? = null
+    ) {
+        viewModelScope.launch {
+            try {
+                repository.addSongToPlaylist(playlistId, songId)
+                onSuccess?.invoke()
+            } catch (e: retrofit2.HttpException) {
+                if (e.code() == 500) {
+                    onError?.invoke("Song already exists in the playlist")
+                } else {
+                    onError?.invoke("Unexpected error: ${e.code()}")
+                }
+            } catch (e: Exception) {
+                onError?.invoke("Failed to add song to playlist")
+            }
+        }
+    }
+
+    fun updatePlaylistName(playlistId: Int, name: String) {
+        viewModelScope.launch {
+            try {
+                repository.updatePlaylist(playlistId, name)
+                _errorMessage.value = null
+            } catch (e: retrofit2.HttpException) {
+                if (e.code() == 400) {
+                    _errorMessage.value = "Invalid name"
+                } else {
+                    _errorMessage.value = "Name already exists"
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Network error"
+            }
+        }
+    }
+
+    fun createPlaylist(name: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                repository.createPlaylist(name)
+                _errorMessage.value = null
+                onSuccess()
+            } catch (e: retrofit2.HttpException) {
+                val msg = if (e.code() == 400) extractMessage(e) ?: "Invalid playlist name"
+                else "Name already exists"
+                _errorMessage.value = msg
+                onError(msg)
+            } catch (e: Exception) {
+                _errorMessage.value = "Network error"
+                onError("Network error")
+            }
+        }
+    }
+
+    private fun extractMessage(e: retrofit2.HttpException): String? {
+        return try {
+            val errorBody = e.response()?.errorBody()?.string()
+            val json = org.json.JSONObject(errorBody ?: "")
+            json.getString("message")
+        } catch (ex: Exception) {
+            null
+        }
+    }
+
+    fun deletePlaylist(playlistId: Int, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                repository.deletePlaylist(playlistId)
+                onSuccess()
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+
+    fun clearError() {
+        _errorMessage.value = null
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            repository.logout()
         }
     }
 }

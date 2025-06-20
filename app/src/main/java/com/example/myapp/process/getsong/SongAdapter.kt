@@ -11,11 +11,13 @@ import java.util.Locale
 import com.example.myapp.R
 
 
-class SongAdapter(private val showFavoriteButton: Boolean = false) :
+class SongAdapter(private val showFavoriteButton: Boolean = false,
+    private  val showDeletePlaylistSong: Boolean = false) :
     ListAdapter<Song, SongAdapter.SongViewHolder>(DiffCallback) {
 
     private var onItemClick: ((Song, Int) -> Unit)? = null
     private var onFavoriteClick: ((Song) -> Unit)? = null
+    private var onMoreClick: ((Song) -> Unit)? = null
 
     inner class SongViewHolder(val binding: ItemSongBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -41,14 +43,22 @@ class SongAdapter(private val showFavoriteButton: Boolean = false) :
             .into(holder.binding.imgSong)
 
         holder.binding.imgbtnFavorite.setImageResource(
-            if (showFavoriteButton) R.drawable.ic_delete_favorite else R.drawable.ic_more_vert
+            when {
+                showFavoriteButton -> R.drawable.ic_delete_favorite
+                showDeletePlaylistSong -> R.drawable.ic_remove
+                else -> R.drawable.ic_more_vert
+            }
         )
 
         holder.binding.root.setOnClickListener {
             onItemClick?.invoke(song, position)
         }
         holder.binding.imgbtnFavorite.setOnClickListener {
-            onFavoriteClick?.invoke(song)
+            if (showFavoriteButton || showDeletePlaylistSong) {
+                onFavoriteClick?.invoke(song)
+            } else {
+                onMoreClick?.invoke(song)
+            }
         }
 
     }
@@ -66,6 +76,10 @@ class SongAdapter(private val showFavoriteButton: Boolean = false) :
 
     fun setOnFavoriteClickListener(listener: (Song) -> Unit) {
         onFavoriteClick = listener
+    }
+
+    fun setOnMoreClickListener(listener: (Song) -> Unit) {
+        onMoreClick = listener
     }
 
     companion object {
