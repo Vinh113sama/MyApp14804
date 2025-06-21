@@ -183,7 +183,7 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
                 } else {
                     onError?.invoke("Unexpected error: ${e.code()}")
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 onError?.invoke("Failed to add song to playlist")
             }
         }
@@ -204,7 +204,7 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
                 val message = if (e.code() == 400) "Invalid name" else "Name already exists"
                 _errorMessage.value = message
                 onError(message)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _errorMessage.value = "Network error"
                 onError("Network error")
             }
@@ -223,7 +223,7 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
                 else "Name already exists"
                 _errorMessage.value = msg
                 onError(msg)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _errorMessage.value = "Network error"
                 onError("Network error")
             }
@@ -235,7 +235,7 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
             val errorBody = e.response()?.errorBody()?.string()
             val json = org.json.JSONObject(errorBody ?: "")
             json.getString("message")
-        } catch (ex: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

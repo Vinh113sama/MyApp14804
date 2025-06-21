@@ -147,17 +147,6 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
         playSongAtIndex(currentIndex)
     }
 
-    fun seekTo(positionMs: Long) {
-        exoPlayer.seekTo(positionMs)
-    }
-
     fun getPlayer(): ExoPlayer = exoPlayer
 
-    fun updateCurrentSong(song: Song) {
-        _currentSong.value = song
-    }
-
-    fun releasePlayer() {
-        exoPlayer.release()
-    }
 }
