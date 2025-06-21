@@ -189,22 +189,28 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
         }
     }
 
-    fun updatePlaylistName(playlistId: Int, name: String) {
+    fun updatePlaylistName(
+        playlistId: Int,
+        name: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
         viewModelScope.launch {
             try {
                 repository.updatePlaylist(playlistId, name)
                 _errorMessage.value = null
+                onSuccess()
             } catch (e: retrofit2.HttpException) {
-                if (e.code() == 400) {
-                    _errorMessage.value = "Invalid name"
-                } else {
-                    _errorMessage.value = "Name already exists"
-                }
+                val message = if (e.code() == 400) "Invalid name" else "Name already exists"
+                _errorMessage.value = message
+                onError(message)
             } catch (e: Exception) {
                 _errorMessage.value = "Network error"
+                onError("Network error")
             }
         }
     }
+
 
     fun createPlaylist(name: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {

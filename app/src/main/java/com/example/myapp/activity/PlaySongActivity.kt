@@ -151,6 +151,7 @@ class PlaySongActivity : AppCompatActivity() {
         }
 
         binding.imgbtnDown.setOnClickListener {
+            setResult(RESULT_OK)
             finish()
         }
 

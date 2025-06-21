@@ -122,8 +122,18 @@ class PlaylistListFragment : Fragment() {
         dialogBinding.btnSave.setOnClickListener {
             val newName = editText.text.toString().trim()
             if (newName.isNotEmpty()) {
-                viewModel.updatePlaylistName(playlist.id, newName)
-                dialog.dismiss()
+                viewModel.updatePlaylistName(
+                    playlist.id,
+                    newName,
+                    onSuccess = {
+                        Toast.makeText(requireContext(), "Renamed", Toast.LENGTH_SHORT).show()
+                        loadPlaylists() 
+                        dialog.dismiss()
+                    },
+                    onError = {
+                        Toast.makeText(requireContext(), "Rename failed", Toast.LENGTH_SHORT).show()
+                    }
+                )
             } else {
                 Toast.makeText(requireContext(), "Name cannot be empty", Toast.LENGTH_SHORT).show()
             }
@@ -131,6 +141,7 @@ class PlaylistListFragment : Fragment() {
 
         dialog.show()
     }
+
 
 
     private fun showAddPlaylistDialog() {

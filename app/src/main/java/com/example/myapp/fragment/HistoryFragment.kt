@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -25,9 +26,9 @@ import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-
-@Suppress("UNCHECKED_CAST", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@Suppress("UNCHECKED_CAST")
 class HistoryFragment : Fragment() {
+
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: SongAdapter
@@ -41,12 +42,18 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    private val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == android.app.Activity.RESULT_OK) {
+            viewModel.clearSongs()
+            viewModel.refresh(SongType.HISTORY)
+        }
+    }
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-
-
-    ): View? {
+    ): View {
         _binding = FragmentHistoryBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -55,31 +62,43 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecyclerView()
+        setupListeners()
+        observeSongs()
+        val navController = findNavController()
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>("updateHistory")
+            ?.observe(viewLifecycleOwner) { shouldUpdate ->
+                if (shouldUpdate == true) {
+                    viewModel.refresh(SongType.HISTORY)
+                    navController.currentBackStackEntry?.savedStateHandle?.set("updateHistory", false)
+                }
+            }
+
+    }
+
+    private fun setupRecyclerView() {
         adapter = SongAdapter()
         binding.rcHistorySongs.layoutManager = LinearLayoutManager(requireContext())
         binding.rcHistorySongs.adapter = adapter
 
-        adapter.setOnMoreClickListener { song ->
-            PlaylistHelper.showAddToPlaylistDialog(
-                fragment = this,
-                song = song,
-                viewModel = viewModel
-            )
-        }
+        binding.rcHistorySongs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val totalItemCount = layoutManager.itemCount
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
 
-        adapter.setOnItemClickListener { song, position ->
-            val intent = Intent(requireContext(), PlaySongActivity::class.java)
-            intent.putParcelableArrayListExtra("playlist", ArrayList(adapter.currentList))
-            intent.putExtra("position", position)
-            startActivity(intent)
-        }
+                if (!viewModel.isLoading.value && !viewModel.isLastPage.value &&
+                    totalItemCount <= lastVisibleItem + 2
+                ) {
+                    viewModel.loadSongs(SongType.HISTORY)
+                }
+            }
+        })
+    }
 
-        adapter.setOnMoreClickListener { song ->
-            PlaylistHelper.showAddToPlaylistDialog(
-                fragment = this,
-                song = song,
-                viewModel = viewModel
-            )
+    private fun setupListeners() {
+        binding.imgbtnBack.setOnClickListener {
+            findNavController().popBackStack()
         }
 
         binding.btnPlayAll.setOnClickListener {
@@ -92,48 +111,40 @@ class HistoryFragment : Fragment() {
                 }
                 startActivity(intent)
             } else {
-                Toast.makeText(requireContext(), "Danh sách trống", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Empty list", Toast.LENGTH_SHORT).show()
             }
         }
-        binding.rcHistorySongs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val totalItemCount = layoutManager.itemCount
-                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-
-
-                if (!viewModel.isLoading.value && !viewModel.isLastPage.value &&
-                    totalItemCount <= lastVisibleItem + 2
-                ) {
-                    viewModel.loadSongs(SongType.HISTORY)
-                }
-            }
-        })
-        binding.imgbtnBack.setOnClickListener {
-            findNavController().popBackStack()
+        adapter.setOnItemClickListener { song, position ->
+            val intent = Intent(requireContext(), PlaySongActivity::class.java)
+            intent.putParcelableArrayListExtra("playlist", ArrayList(adapter.currentList))
+            intent.putExtra("position", position)
+            launcher.launch(intent)
         }
 
-        observeSongs()
-        viewModel.loadSongs(SongType.HISTORY)
+        adapter.setOnMoreClickListener { song ->
+            PlaylistHelper.showAddToPlaylistDialog(
+                fragment = this,
+                song = song,
+                viewModel = viewModel
+            )
+        }
     }
-
 
     private fun observeSongs() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.songs.collectLatest { songList ->
-                adapter.submitList(songList)
+                adapter.submitList(songList.toList())
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     override fun onResume() {
         super.onResume()
         viewModel.refresh(SongType.HISTORY)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

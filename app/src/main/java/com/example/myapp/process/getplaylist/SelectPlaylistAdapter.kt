@@ -13,7 +13,7 @@ class SelectPlaylistAdapter(
 
     companion object DiffCallback : DiffUtil.ItemCallback<PlaylistResponse>() {
         override fun areItemsTheSame(oldItem: PlaylistResponse, newItem: PlaylistResponse): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem.name == newItem.name
         }
 
         override fun areContentsTheSame(oldItem: PlaylistResponse, newItem: PlaylistResponse): Boolean {
@@ -37,4 +37,5 @@ class SelectPlaylistAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
+
 }

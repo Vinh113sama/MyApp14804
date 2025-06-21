@@ -76,7 +76,7 @@ class FavoriteFragment : Fragment() {
                 }
                 startActivity(intent)
             } else {
-                Toast.makeText(requireContext(), "Danh sách trống", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Empty list", Toast.LENGTH_SHORT).show()
             }
         }
         binding.rcFavoriteSongs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -103,6 +103,9 @@ class FavoriteFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 viewModel.clearFavoriteSong(song.id)
                 viewModel.refresh(SongType.FAVORITE)
+                findNavController().previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.set("favoriteChanged", true)
             }
         }
         observeSongs()

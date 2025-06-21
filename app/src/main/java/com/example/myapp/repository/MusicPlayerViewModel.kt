@@ -57,43 +57,31 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     fun setPlaylist(songs: List<Song>, startPosition: Int = 0, autoPlay: Boolean = true) {
         _playlist.value = songs
         currentIndex = startPosition
-        preloadUrls(songs)
-        playSongAtIndex(currentIndex, autoPlay)
-    }
-
-
-    private fun preloadUrls(songs: List<Song>) {
         viewModelScope.launch {
-            for (song in songs) {
-                if (!urlCache.containsKey(song.id)) {
-                    try {
-                        val response = RetrofitClient.apiService.getLink(song.id)
-                        val url = response.data.url.replace(" ", "%20")
-                        urlCache[song.id] = url
-                    } catch (_: Exception) {}
-                }
-            }
+            playSongAtIndexFromList(songs, currentIndex, autoPlay)
         }
     }
 
-    private fun playSongAtIndex(index: Int, autoPlay: Boolean = true) {
-        val list = _playlist.value ?: return
+    private fun playSongAtIndexFromList(
+        list: List<Song>,
+        index: Int,
+        autoPlay: Boolean = true
+    ) {
         if (index !in list.indices) return
 
         currentIndex = index
         val song = list[index]
-        _currentSong.value = song
 
         viewModelScope.launch {
             try {
                 _isPlaying.value = false
 
-                val url = urlCache[song.id] ?: run {
-                    val response = RetrofitClient.apiService.getLink(song.id)
-                    val fetchedUrl = response.data.url.replace(" ", "%20")
-                    urlCache[song.id] = fetchedUrl
-                    fetchedUrl
-                }
+                exoPlayer.stop()
+                exoPlayer.clearMediaItems()
+
+                val response = RetrofitClient.apiService.getLink(song.id)
+                val url = response.data.url.replace(" ", "%20")
+                urlCache[song.id] = url
 
                 val mediaItem = MediaItem.Builder()
                     .setUri(url)
@@ -104,23 +92,33 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
                 exoPlayer.setMediaItem(mediaItem, true)
                 exoPlayer.prepare()
 
+                _currentSong.value = song
+
                 if (autoPlay) {
                     exoPlayer.playWhenReady = true
                     exoPlayer.play()
                 }
 
-                preloadNextSong()
-
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("MusicPlayer", "getLink or play failed: ${e.message}")
             }
         }
     }
 
+
+    private fun playSongAtIndex(index: Int, autoPlay: Boolean = true) {
+        val list = _playlist.value ?: return
+        playSongAtIndexFromList(list, index, autoPlay)
+    }
+
     fun playNext() {
         val list = _playlist.value ?: return
-        val nextIndex = if (isShuffle) {
-            (list.indices - currentIndex).random()
+        val nextIndex = if (isShuffle && list.size > 1) {
+            var newIndex: Int
+            do {
+                newIndex = list.indices.random()
+            } while (newIndex == currentIndex)
+            newIndex
         } else {
             (currentIndex + 1) % list.size
         }
@@ -161,24 +159,5 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
 
     fun releasePlayer() {
         exoPlayer.release()
-    }
-
-    private fun preloadNextSong() {
-        val list = _playlist.value ?: return
-        val nextIndex = if (isShuffle) {
-            (list.indices - currentIndex).random()
-        } else {
-            (currentIndex + 1) % list.size
-        }
-        val nextSong = list[nextIndex]
-        if (!urlCache.containsKey(nextSong.id)) {
-            viewModelScope.launch {
-                try {
-                    val response = RetrofitClient.apiService.getLink(nextSong.id)
-                   // val url = response.data.url.replace(" ", "%20")
-                    urlCache[nextSong.id] = response.data.url
-                } catch (_: Exception) {}
-            }
-        }
     }
 }

@@ -69,6 +69,18 @@ class HomeActivity : AppCompatActivity() {
 
         setupNavigationMenu()
         setupMiniPlayer()
+        navHostFragment.navController.currentBackStackEntry
+            ?.savedStateHandle
+            ?.getLiveData<Boolean>("favoriteChanged")
+            ?.observe(this) { changed ->
+                if (changed == true) {
+                    processFavorite()
+                    navHostFragment.navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("favoriteChanged", false)
+                }
+            }
+
     }
 
     private val viewModel: SongViewModel by viewModels {
@@ -83,6 +95,9 @@ class HomeActivity : AppCompatActivity() {
     @OptIn(UnstableApi::class)
     private fun setupMiniPlayer() {
         musicViewModel.currentSong.observe(this) { song ->
+            navHostFragment.navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.set("updateHistory", true)
             if (song != null) {
                 miniPlayerBinding.tvMiniTitle.text = song.title
                 miniPlayerBinding.tvMiniArtist.text = song.artist.name
@@ -104,11 +119,15 @@ class HomeActivity : AppCompatActivity() {
             intent.putParcelableArrayListExtra("playlist", ArrayList(playlist))
             intent.putExtra("position", position)
             intent.putExtra("fromMiniPlayer", true)
+            navHostFragment.navController.currentBackStackEntry?.savedStateHandle?.set("updateHistory", true)
             startActivity(intent)
         }
 
         miniPlayerBinding.imgbtnNext.setOnClickListener {
             musicViewModel.playNext()
+            navHostFragment.navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.set("updateHistory", true)
         }
 
         miniPlayerBinding.imgbtnPlayPause.setOnClickListener {
