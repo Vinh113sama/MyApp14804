@@ -8,6 +8,7 @@ import android.os.Looper
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
@@ -51,12 +52,19 @@ class PlaySongActivity : AppCompatActivity() {
                 @Suppress("DEPRECATION")
                 intent.getParcelableArrayListExtra("playlist") ?: arrayListOf()
             }
+
         val position = intent.getIntExtra("position", 0)
 
+        if (playlist.isEmpty() || position !in playlist.indices) {
+            Toast.makeText(this, "Invalid playlist or position", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
         if (!intent.getBooleanExtra("fromMiniPlayer", false)) {
             musicViewModel.setPlaylist(playlist, position, autoPlay = true)
         }
+
         observeViewModel()
         setupPlayerListener()
         startSeekBarUpdate()
@@ -132,7 +140,6 @@ class PlaySongActivity : AppCompatActivity() {
                     musicViewModel.getPlayer().seekTo(progress * 1000L)
                 }
             }
-
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 handler.removeCallbacks(seekBarRunnable)
             }
@@ -164,6 +171,8 @@ class PlaySongActivity : AppCompatActivity() {
             if (song != null) {
                 viewModel.toggleFavorite(song, onComplete = {
                     processFavorite()
+                    val message = if (song.isFavorite) "Added to favorites" else "Removed from favorites successfully"
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                 })
             }
         }

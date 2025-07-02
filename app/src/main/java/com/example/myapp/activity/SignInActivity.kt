@@ -15,6 +15,8 @@ import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.login.LoginRequest
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import retrofit2.HttpException
 
 class SignInActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignInBinding
@@ -47,39 +49,43 @@ class SignInActivity : AppCompatActivity() {
             val password = binding.edtPassword.text.toString().trim()
 
             if (username.isEmpty() || password.isEmpty()) {
-                Snackbar.make(btnLogin, "Email và mật khẩu không được để trống", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(btnLogin, "Username and password cannot be empty", Snackbar.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
             lifecycleScope.launch {
                 try {
                     val response = RetrofitClient.authService.login(LoginRequest(username, password))
-                    val token = response.token
+                    val token = response.body()?.data?.token
 
-                    if (token.isNotEmpty()) {
-                        val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                        sharedPreferences.edit().putString("access_token", token).apply()
+                    if (response.isSuccessful) {
+                        if (!token.isNullOrEmpty()) {
+                            getSharedPreferences("auth_prefs", MODE_PRIVATE)
+                                .edit()
+                                .putString("access_token", token)
+                                .apply()
 
-                        startActivity(Intent(this@SignInActivity, HomeActivity::class.java))
-                        finish()
+                            startActivity(Intent(this@SignInActivity, HomeActivity::class.java))
+                            finish()
+                        } else {
+                            Snackbar.make(btnLogin, "Missing token in response.", Snackbar.LENGTH_SHORT).show()
+                        }
                     } else {
-                        Snackbar.make(btnLogin, "Không nhận được token từ server", Snackbar.LENGTH_SHORT).show()
+                        val errorText = response.errorBody()?.string()
+                        val message = JSONObject(errorText ?: "{}").optString("message")
+                        if (message.isNotBlank()) {
+                            Snackbar.make(btnLogin, message, Snackbar.LENGTH_SHORT).show()
+                        }
                     }
+
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Snackbar.make(btnLogin, "Đăng nhập thất bại hoặc lỗi kết nối", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(btnLogin, "Network error or unexpected failure.", Snackbar.LENGTH_SHORT).show()
                 }
             }
+
         }
         tvSignUp.setOnClickListener {
-            val intent = Intent(this, SignUpActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SignUpActivity::class.java))
         }
     }
 }
-
-
-
-
-
-

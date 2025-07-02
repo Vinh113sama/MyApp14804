@@ -8,22 +8,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.databinding.ItemSelectPlaylistBinding
 
 class SelectPlaylistAdapter(
-    private val onClick: (PlaylistResponse) -> Unit
-) : ListAdapter<PlaylistResponse, SelectPlaylistAdapter.ViewHolder>(DiffCallback) {
+    private val onClick: (Playlist) -> Unit
+) : ListAdapter<Playlist, SelectPlaylistAdapter.ViewHolder>(DiffCallback) {
 
-    companion object DiffCallback : DiffUtil.ItemCallback<PlaylistResponse>() {
-        override fun areItemsTheSame(oldItem: PlaylistResponse, newItem: PlaylistResponse): Boolean {
+    companion object DiffCallback : DiffUtil.ItemCallback<Playlist>() {
+        override fun areItemsTheSame(oldItem: Playlist, newItem: Playlist): Boolean {
             return oldItem.name == newItem.name
         }
 
-        override fun areContentsTheSame(oldItem: PlaylistResponse, newItem: PlaylistResponse): Boolean {
+        override fun areContentsTheSame(oldItem: Playlist, newItem: Playlist): Boolean {
             return oldItem == newItem
         }
     }
 
     inner class ViewHolder(private val binding: ItemSelectPlaylistBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: PlaylistResponse) {
+        fun bind(item: Playlist) {
             binding.tvPlaylistName.text = item.name
             binding.root.setOnClickListener { onClick(item) }
         }

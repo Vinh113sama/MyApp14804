@@ -3,7 +3,6 @@ package com.example.myapp.repository
 import android.app.Application
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
-import com.example.myapp.repository.MusicPlayerViewModel
 
 object AppViewModelProvider {
     lateinit var application: Application

@@ -2,9 +2,11 @@ package com.example.myapp.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -13,6 +15,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.activity.PlaySongActivity
 import com.example.myapp.databinding.FragmentPlaylistBinding
 import com.example.myapp.process.RetrofitClient
@@ -56,15 +59,42 @@ class PlaylistFragment : Fragment() {
 
         playlistId = args.playlistId
         playlistName = args.playlistName
+        Log.d("PlaylistFragment", "playlistId = $playlistId")
         binding.tvNamePlaylist.text = playlistName
         binding.tvNamePlaylist.text = playlistName
         setupRecyclerView()
         observePlaylistSongs()
-        viewModel.loadSongsInPlaylist(playlistId)
+        viewModel.loadSongs(SongType.PLAYLISTSONG, playlistId = playlistId)
 
-        adapter.setOnFavoriteClickListener  { song ->
-            viewModel.deletePlaylistSong(playlistId, song.id)
+        adapter.setOnFavoriteClickListener { song ->
+            viewModel.deletePlaylistSong(
+                playlistId = playlistId,
+                songId = song.id,
+                onSuccess = { message ->
+                    viewModel.refresh(SongType.PLAYLISTSONG, playlistId = playlistId)
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                },
+                onError = { error ->
+                    Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+                }
+            )
         }
+
+        binding.rcPlaylistSongs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val totalItemCount = layoutManager.itemCount
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+
+                if (!viewModel.isLoading.value && !viewModel.isLastPage.value &&
+                    totalItemCount <= lastVisibleItem + 2
+                ) {
+                    viewModel.loadSongs(SongType.PLAYLISTSONG, playlistId = playlistId)
+                }
+            }
+        })
 
         binding.imgbtnBack.setOnClickListener {
             findNavController().popBackStack()

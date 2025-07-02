@@ -3,15 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-
 
     <application
+        android:name=".repository.MyApplication"
         android:allowBackup="true"
         android:fitsSystemWindows="true"
         android:hardwareAccelerated="true"
-        android:name=".repository.MyApplication"
         android:icon="@drawable/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
@@ -19,18 +16,6 @@
         android:usesCleartextTraffic="true"
         tools:ignore="MissingClass,UnusedAttribute"
         tools:replace="android:allowBackup">
-        <service
-            android:name=".repository.MusicService"
-            android:exported="true"
-            android:foregroundServiceType="mediaPlayback"
-            android:enabled="true"
-            tools:node="replace">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-            </intent-filter>
-        </service>
-
-
         <activity
             android:name=".activity.SplashActivity"
             android:exported="true">
@@ -51,7 +36,7 @@
             android:exported="false" />
         <activity
             android:name=".activity.PlaySongActivity"
-            android:exported="true"/>
+            android:exported="true" />
     </application>
 
 </manifest>

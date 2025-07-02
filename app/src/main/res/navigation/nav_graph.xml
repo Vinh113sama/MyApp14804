@@ -21,6 +21,9 @@
         <action
             android:id="@+id/action_songListFragment_to_searchFragment"
             app:destination="@id/searchFragment" />
+        <action
+            android:id="@+id/action_songListFragment_to_ratingFragment"
+            app:destination="@id/rankingFragment" />
     </fragment>
     <fragment
         android:id="@+id/favoriteFragment"
@@ -67,4 +70,38 @@
         android:name="keyword"
         app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/rankingkpopFragment"
+        android:name="com.example.myapp.fragment.RankingKpopFragment"
+        android:label="fragment_playlist"
+        tools:layout="@layout/fragment_ranking_kpop" >
+    </fragment>
+    <fragment
+        android:id="@+id/rankingFragment"
+        android:name="com.example.myapp.fragment.RankingFragment"
+        android:label="fragment_playlist"
+        tools:layout="@layout/fragment_ranking" >
+        <action
+            android:id="@+id/action_ratingFragment_to_ratingusukFragment"
+            app:destination="@id/rankingusukFragment" />
+        <action
+            android:id="@+id/action_ratingFragment_to_ratingvnFragment"
+            app:destination="@id/rankingvnFragment" />
+        <action
+            android:id="@+id/action_ratingFragment_to_ratingkpopFragment"
+            app:destination="@id/rankingkpopFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/rankingvnFragment"
+        android:name="com.example.myapp.fragment.RankingVnFragment"
+        android:label="fragment_playlist"
+        tools:layout="@layout/fragment_ranking_vn" >
+    </fragment>
+    <fragment
+        android:id="@+id/rankingusukFragment"
+        android:name="com.example.myapp.fragment.RankingUsUkFragment"
+        android:label="fragment_playlist"
+        tools:layout="@layout/fragment_ranking_us_uk" >
+    </fragment>
+
 </navigation>

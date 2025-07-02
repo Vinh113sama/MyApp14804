@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapp.databinding.DialogAddToPlaylistBinding
-import com.example.myapp.process.getplaylist.PlaylistResponse
+import com.example.myapp.process.getplaylist.Playlist
 import com.example.myapp.process.getplaylist.SelectPlaylistAdapter
 import com.example.myapp.process.getsong.Song
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ object PlaylistHelper {
         fragment: Fragment,
         song: Song,
         viewModel: SongViewModel,
-        onSongAdded: ((PlaylistResponse) -> Unit)? = null
+        onSongAdded: ((Playlist) -> Unit)? = null
     ) {
         val binding = DialogAddToPlaylistBinding.inflate(fragment.layoutInflater)
         val dialog = AlertDialog.Builder(fragment.requireContext())
@@ -30,19 +30,15 @@ object PlaylistHelper {
         val adapter = SelectPlaylistAdapter { playlist ->
             viewModel.addSongToPlaylist(
                 playlistId = playlist.id,
-                songId = song.id,
-                onSuccess = {
-                    Toast.makeText(fragment.requireContext(), "Added to ${playlist.name}", Toast.LENGTH_SHORT).show()
+                songId = song.id
+            ) { isSuccess, message ->
+                Toast.makeText(fragment.requireContext(), message, Toast.LENGTH_SHORT).show()
+                if (isSuccess) {
                     onSongAdded?.invoke(playlist)
                     dialog.dismiss()
-                },
-                onError = { errorMessage ->
-                    Toast.makeText(fragment.requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                 }
-            )
+            }
         }
-
-
         binding.rcPlaylists.apply {
             layoutManager = LinearLayoutManager(fragment.requireContext())
             this.adapter = adapter
@@ -50,8 +46,7 @@ object PlaylistHelper {
 
         fragment.viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val userId = viewModel.getUserInformation().id
-                val playlists = viewModel.getPlaylist(userId)
+                val playlists = viewModel.getPlaylist()
 
                 if (playlists.isEmpty()) {
                     binding.layoutEmpty.visibility = View.VISIBLE

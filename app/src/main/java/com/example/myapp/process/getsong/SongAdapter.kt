@@ -40,6 +40,8 @@ class SongAdapter(private val showFavoriteButton: Boolean = false,
 
         Glide.with(holder.itemView.context)
             .load(song.imageUrl)
+            .placeholder(R.drawable.img_avatar_default)
+            .error(R.drawable.img_avatar_default)
             .into(holder.binding.imgSong)
 
         holder.binding.imgbtnFavorite.setImageResource(

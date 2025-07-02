@@ -11,7 +11,10 @@
     <string name="hint_password_again">Re-enter your password</string>
     <string name="explore_music">Explore</string>
     <string name="created_date">Created %s</string>
-
+    <string name="k_pop">K-POP</string>
+    <string name="viet_nam">Việt Nam</string>
+    <string name="us_uk">US-UK</string>
+    <string name="tv_rating">Ranking</string>
     <string name="imgbtn_content">img</string>
     <string name="label_start_time">00:00</string>
     <string name="label_imgbutton">imgbutton</string>

@@ -2,13 +2,12 @@ package com.example.myapp.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
@@ -16,7 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.activity.PlaySongActivity
-import com.example.myapp.databinding.FragmentHistoryBinding
+import com.example.myapp.databinding.FragmentRankingVnBinding
 import com.example.myapp.process.RetrofitClient
 import com.example.myapp.process.getsong.SongAdapter
 import com.example.myapp.process.login.SongType
@@ -25,11 +24,12 @@ import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlin.getValue
+
 
 @Suppress("UNCHECKED_CAST")
-class HistoryFragment : Fragment() {
-
-    private var _binding: FragmentHistoryBinding? = null
+class RankingVnFragment : Fragment() {
+    private var _binding: FragmentRankingVnBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: SongAdapter
 
@@ -42,19 +42,12 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    private val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == android.app.Activity.RESULT_OK) {
-            viewModel.clearSongs()
-            viewModel.refresh(SongType.HISTORY)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHistoryBinding.inflate(inflater, container, false)
+        _binding = FragmentRankingVnBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -65,23 +58,14 @@ class HistoryFragment : Fragment() {
         setupRecyclerView()
         setupListeners()
         observeSongs()
-//        val navController = findNavController()
-//        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>("updateHistory")
-//            ?.observe(viewLifecycleOwner) { shouldUpdate ->
-//                if (shouldUpdate == true) {
-//                    viewModel.refresh(SongType.HISTORY)
-//                    navController.currentBackStackEntry?.savedStateHandle?.set("updateHistory", false)
-//                }
-//            }
-
     }
 
     private fun setupRecyclerView() {
         adapter = SongAdapter()
-        binding.rcHistorySongs.layoutManager = LinearLayoutManager(requireContext())
-        binding.rcHistorySongs.adapter = adapter
+        binding.rcRating1Songs.layoutManager = LinearLayoutManager(requireContext())
+        binding.rcRating1Songs.adapter = adapter
 
-        binding.rcHistorySongs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.rcRating1Songs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val totalItemCount = layoutManager.itemCount
@@ -90,7 +74,7 @@ class HistoryFragment : Fragment() {
                 if (!viewModel.isLoading.value && !viewModel.isLastPage.value &&
                     totalItemCount <= lastVisibleItem + 2
                 ) {
-                    viewModel.loadSongs(SongType.HISTORY)
+                   viewModel.loadSongs(SongType.VN)
                 }
             }
         })
@@ -118,7 +102,7 @@ class HistoryFragment : Fragment() {
             val intent = Intent(requireContext(), PlaySongActivity::class.java)
             intent.putParcelableArrayListExtra("playlist", ArrayList(adapter.currentList))
             intent.putExtra("position", position)
-            launcher.launch(intent)
+            startActivity(intent)
         }
 
         adapter.setOnMoreClickListener { song ->
@@ -140,7 +124,7 @@ class HistoryFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.refresh(SongType.HISTORY)
+        viewModel.refresh(SongType.VN)
     }
 
     override fun onDestroyView() {

@@ -1,21 +1,20 @@
 package com.example.myapp.repository
 
-
-import com.example.myapp.process.getplaylist.AddSongToPlaylistRequest
-import com.example.myapp.process.getplaylist.CreatePlaylistRequest
-import com.example.myapp.process.getplaylist.PlaylistResponse
-import com.example.myapp.process.getplaylist.RemoveSongFromPlaylistRequest
-import com.example.myapp.process.getplaylist.UpdatePlaylistRequest
+import com.example.myapp.process.getplaylist.IdSong
+import com.example.myapp.process.getplaylist.NamePlaylistRequest
+import com.example.myapp.process.getplaylist.Playlist
+import com.example.myapp.process.getplaylist.PlaylistAllResponse
 import com.example.myapp.process.getsong.ApiService
+import com.example.myapp.process.getsong.Artist
 import com.example.myapp.process.getsong.FavoriteRequest
 import com.example.myapp.process.getsong.Song
 import com.example.myapp.process.getsong.UserResponse
-
+import retrofit2.Response
 
 
 class SongRepository(private val apiService: ApiService) {
 
-    suspend fun getSongs(keyword: String?, page: Int, limit: Int = 8): List<Song> {
+    suspend fun getSongs(keyword: String?, page: Int, limit: Int = 10): List<Song> {
         return apiService.getSongs(keyword, page, limit).data
     }
 
@@ -27,8 +26,8 @@ class SongRepository(private val apiService: ApiService) {
         apiService.postFavoriteSong(FavoriteRequest(songId))
     }
 
-    suspend fun deleteFavorite(songId: Int) {
-        apiService.deleteFavoriteSong(FavoriteRequest(songId))
+    suspend fun deleteFavorite(songId: Int): Response<PlaylistAllResponse> {
+        return apiService.deleteFavoriteSong(songId)
     }
 
     suspend fun getHistorySongs(page: Int, limit: Int = 10): List<Song> {
@@ -39,40 +38,79 @@ class SongRepository(private val apiService: ApiService) {
         return apiService.getUserInfor()
     }
 
-    suspend fun getPlaylistList(userId: Int): List<PlaylistResponse> {
-        return apiService.getUserPlaylists(userId).data
+    suspend fun getPlaylistList(): List<Playlist> {
+        return apiService.getPlaylists().body()?.data?.playlists ?: emptyList()
     }
 
     suspend fun getPlaylistSongs(playlistId: Int, page: Int, limit: Int = 10): List<Song> {
-        return apiService.getPlaylistSongs(playlistId, page, limit).data.map { it.song }
+        return apiService.getPlaylistSongs(playlistId, page, limit)
+            .data.map { it.song }
     }
 
-    suspend fun deletePlaylistSong(playlistId: Int, songId: Int) {
-        val request = RemoveSongFromPlaylistRequest(songId)
-        apiService.removeSongFromPlaylist(playlistId, request)
+    suspend fun deletePlaylistSong(playlistId: Int, songId: Int): Response<PlaylistAllResponse> {
+        return apiService.removeSongFromPlaylist(playlistId, songId)
     }
 
-    suspend fun addSongToPlaylist(playlistId: Int, songId: Int) {
-        val request = AddSongToPlaylistRequest(songId)
-        apiService.addSongToPlaylist(playlistId, request)
+    suspend fun addSongToPlaylist(playlistId: Int, songId: Int): Response<PlaylistAllResponse> {
+        val request = IdSong(songId)
+        return apiService.addSongToPlaylist(playlistId, request)
     }
 
     suspend fun logout() {
         apiService.logout()
     }
 
-    suspend fun updatePlaylist(playlistId: Int, name: String): PlaylistResponse {
-        val request = UpdatePlaylistRequest(name)
+    suspend fun updatePlaylist(playlistId: Int, name: String): Response<PlaylistAllResponse> {
+        val request = NamePlaylistRequest(name)
         return apiService.updatePlaylist(playlistId, request)
     }
 
-    suspend fun createPlaylist(name: String): PlaylistResponse {
-        val request = CreatePlaylistRequest(name)
+    suspend fun createPlaylist(name: String): Response<PlaylistAllResponse> {
+        val request = NamePlaylistRequest(name)
         return apiService.createPlaylist(request)
     }
 
-    suspend fun deletePlaylist(playlistId: Int): PlaylistResponse {
+    suspend fun deletePlaylist(playlistId: Int): Response<PlaylistAllResponse> {
         return apiService.deletePlaylist(playlistId)
     }
 
+    suspend fun getTopSongs(page: Int, limit: Int = 10): List<Song> {
+        return try {
+            val response = apiService.fetchTopSongs(page, limit)
+            response.data.map {
+                Song(
+                    id = it.id,
+                    title = it.title,
+                    duration = it.duration,
+                    url = it.url,
+                    imageUrl = it.imageUrl,
+                    artist = Artist(it.artist.id, it.artist.name),
+                    isFavorite = false
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    suspend fun getByGenre(genreName: String, page: Int, limit: Int = 10): List<Song> {
+        return try {
+            val response = apiService.getSongsByGenre(genreName, page, limit)
+            response.data.map {
+                Song(
+                    id = it.id,
+                    title = it.title,
+                    duration = it.duration,
+                    url = it.url,
+                    imageUrl = it.imageUrl,
+                    artist = Artist(it.artist.id, it.artist.name),
+                    isFavorite = false
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
 }

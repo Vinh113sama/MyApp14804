@@ -19,7 +19,7 @@ object RetrofitClient {
     private val authInterceptor = Interceptor { chain ->
         val prefs = appContext.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
         val token = prefs.getString("access_token", null)
-
+        android.util.Log.d("API_CALL", "Token đang gửi: $token")
         val requestBuilder = chain.request().newBuilder()
         if (!token.isNullOrEmpty()) {
             requestBuilder.addHeader("Authorization", "Bearer $token")

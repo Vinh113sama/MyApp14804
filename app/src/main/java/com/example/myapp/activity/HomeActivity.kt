@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.LinearInterpolator
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AlertDialog
@@ -95,9 +96,9 @@ class HomeActivity : AppCompatActivity() {
     @OptIn(UnstableApi::class)
     private fun setupMiniPlayer() {
         musicViewModel.currentSong.observe(this) { song ->
-            navHostFragment.navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set("updateHistory", true)
+//            navHostFragment.navController.currentBackStackEntry
+//                ?.savedStateHandle
+//                ?.set("updateHistory", true)
             if (song != null) {
                 miniPlayerBinding.tvMiniTitle.text = song.title
                 miniPlayerBinding.tvMiniArtist.text = song.artist.name
@@ -144,6 +145,8 @@ class HomeActivity : AppCompatActivity() {
             if (song != null) {
                 viewModel.toggleFavorite(song, onComplete = {
                     processFavorite()
+                    val message = if (song.isFavorite) "Added to favorites" else "Removed from favorites successfully"
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                     val navController = navHostFragment.navController
                     navController.currentBackStackEntry?.savedStateHandle?.set(
                         "favoriteUpdated",
@@ -165,6 +168,11 @@ class HomeActivity : AppCompatActivity() {
     private fun setupNavigationMenu() {
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
+                R.id.nav_ranking -> {
+                    navController.navigate(R.id.rankingFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
                 R.id.nav_history -> {
                     navController.navigate(R.id.historyFragment)
                     drawerLayout.closeDrawer(GravityCompat.START)
@@ -191,7 +199,7 @@ class HomeActivity : AppCompatActivity() {
 
                 R.id.nav_signout -> {
                     showLogoutDialog(
-                        context = this, // hoặc requireContext() nếu trong Fragment
+                        context = this,
                         onConfirm = {
                             viewModel.logout()
                             val intent = Intent(this, SignInActivity::class.java)

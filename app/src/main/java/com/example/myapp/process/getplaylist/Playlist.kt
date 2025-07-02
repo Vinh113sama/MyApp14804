@@ -1,60 +1,47 @@
 package com.example.myapp.process.getplaylist
 
+import android.os.Parcelable
 import com.example.myapp.process.getsong.Song
-
-
-data class CreatePlaylistRequest(
-    val name: String
-)
-
-data class UpdatePlaylistRequest(
-    val name: String
-)
-
-data class AddSongToPlaylistRequest(
-    val songId: Int
-)
-
-data class RemoveSongFromPlaylistRequest(
-    val songId: Int
-)
+import kotlinx.android.parcel.Parcelize
 
 data class PlaylistResponse(
+    val statusCode: Int,
+    val message: String,
+    val data: PlaylistData
+)
+
+data class PlaylistData(
+    val playlists: List<Playlist>
+)
+
+@Suppress("DEPRECATED_ANNOTATION")
+@Parcelize
+data class Playlist(
     val id: Int,
     val name: String
-)
-
-data class PlaylistListResponse(
-    val data: List<PlaylistResponse>
-)
+) : Parcelable
 
 data class PlaylistSongsResponse(
-    val data: List<PlaylistSongItem>,
-    val playlistId: Int
+    val statusCode: Int,
+    val message: String,
+    val data: List<PlaylistSongEntry>
 )
 
-data class PlaylistSongItem(
+data class PlaylistSongEntry(
+    val playlistId: Int,
+    val songId: Int,
+    val addedAt: String,
     val song: Song
 )
 
-data class AddSongResponse(
-    val message: String,
-    val data: AddSongData
+data class NamePlaylistRequest(
+    val name: String
 )
 
-data class AddSongData(
-    val playlistId: Int,
-    val songId: Int,
-    val addedAt: String
+data class IdSong(
+    val songId: Int
 )
-
-data class RemoveSongResponse(
-    val message: String,
-    val data: RemoveSongData
-)
-
-data class RemoveSongData(
-    val playlistId: Int,
-    val songId: Int,
-    val addedAt: String
+data class PlaylistAllResponse(
+   // val statusCode: Int,
+    val message: String
 )

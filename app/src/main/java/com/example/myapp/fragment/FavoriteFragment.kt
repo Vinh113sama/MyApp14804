@@ -101,13 +101,22 @@ class FavoriteFragment : Fragment() {
 
         adapter.setOnFavoriteClickListener { song ->
             viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.clearFavoriteSong(song.id)
-                viewModel.refresh(SongType.FAVORITE)
-                findNavController().previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("favoriteChanged", true)
+                viewModel.clearFavoriteSong(
+                    song.id,
+                    onSuccess = { message ->
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                        viewModel.refresh(SongType.FAVORITE)
+                        findNavController().previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("favoriteChanged", true)
+                    },
+                    onError = { error ->
+                        Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+                    }
+                )
             }
         }
+
         observeSongs()
         viewModel.loadSongs(SongType.FAVORITE)
 
@@ -116,10 +125,12 @@ class FavoriteFragment : Fragment() {
             ?.observe(viewLifecycleOwner) { updated ->
                 if (updated == true) {
                     viewModel.refresh(SongType.FAVORITE)
-                    findNavController().currentBackStackEntry?.savedStateHandle?.set("favoriteUpdated", false)
+                    findNavController().currentBackStackEntry?.savedStateHandle?.set(
+                        "favoriteUpdated",
+                        false
+                    )
                 }
             }
-
     }
 
     @OptIn(UnstableApi::class)

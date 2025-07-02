@@ -7,18 +7,16 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.databinding.ItemPlaylistBinding
 
-class PlaylistAdapter : ListAdapter<PlaylistResponse, PlaylistAdapter.PlaylistViewHolder>(PlaylistDiffCallback) {
+class PlaylistAdapter : ListAdapter<Playlist, PlaylistAdapter.PlaylistViewHolder>(PlaylistDiffCallback) {
 
-
-    private var onItemClick: ((PlaylistResponse) -> Unit)? = null
-    private var onEditClick: ((PlaylistResponse) -> Unit)? = null
-    private var onDeleteClick: ((PlaylistResponse) -> Unit)? = null
-
+    private var onItemClick: ((Playlist) -> Unit)? = null
+    private var onEditClick: ((Playlist) -> Unit)? = null
+    private var onDeleteClick: ((Playlist) -> Unit)? = null
 
     inner class PlaylistViewHolder(private val binding: ItemPlaylistBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: PlaylistResponse) {
+        fun bind(item: Playlist) {
             binding.tvPlaylistName.text = item.name
 
             binding.root.setOnClickListener {
@@ -44,25 +42,25 @@ class PlaylistAdapter : ListAdapter<PlaylistResponse, PlaylistAdapter.PlaylistVi
         holder.bind(getItem(position))
     }
 
-    fun setOnItemClickListener(listener: (PlaylistResponse) -> Unit) {
+    fun setOnItemClickListener(listener: (Playlist) -> Unit) {
         onItemClick = listener
     }
 
-    fun setOnEditClickListener(listener: (PlaylistResponse) -> Unit) {
+    fun setOnEditClickListener(listener: (Playlist) -> Unit) {
         onEditClick = listener
     }
 
-    fun setOnDeleteClickListener(listener: (PlaylistResponse) -> Unit) {
+    fun setOnDeleteClickListener(listener: (Playlist) -> Unit) {
         onDeleteClick = listener
     }
 
     companion object {
-        private val PlaylistDiffCallback = object : DiffUtil.ItemCallback<PlaylistResponse>() {
-            override fun areItemsTheSame(oldItem: PlaylistResponse, newItem: PlaylistResponse): Boolean {
-                return oldItem.id == newItem.id
+        private val PlaylistDiffCallback = object : DiffUtil.ItemCallback<Playlist>() {
+            override fun areItemsTheSame(oldItem: Playlist, newItem: Playlist): Boolean {
+                return oldItem.name == newItem.name
             }
 
-            override fun areContentsTheSame(oldItem: PlaylistResponse, newItem: PlaylistResponse): Boolean {
+            override fun areContentsTheSame(oldItem: Playlist, newItem: Playlist): Boolean {
                 return oldItem == newItem
             }
         }

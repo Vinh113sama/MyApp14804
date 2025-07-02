@@ -7,7 +7,16 @@ data class LoginRequest(
 )
 
 data class LoginResponse(
+    val message: String,
+    val data: Token
+)
+
+data class Token(
     val token: String
+)
+
+data class RegisterResponse(
+    val message: String
 )
 
 data class RegisterRequest(

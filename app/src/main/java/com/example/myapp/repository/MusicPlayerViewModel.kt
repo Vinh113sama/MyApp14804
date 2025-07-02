@@ -34,8 +34,6 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     private var currentIndex = 0
     private var isShuffle = false
 
-    private val urlCache = mutableMapOf<Int, String>()
-
     init {
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
@@ -79,31 +77,36 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
                 exoPlayer.stop()
                 exoPlayer.clearMediaItems()
 
-                val response = RetrofitClient.apiService.getLink(song.id)
-                val url = response.data.url.replace(" ", "%20")
-                urlCache[song.id] = url
+                val url = song.url
+                if (url.isNullOrBlank()) {
+                    return@launch
+                }
 
                 val mediaItem = MediaItem.Builder()
                     .setUri(url)
-                    .setMimeType(MimeTypes.APPLICATION_M3U8)
                     .setTag(song.id)
                     .build()
 
                 exoPlayer.setMediaItem(mediaItem, true)
                 exoPlayer.prepare()
 
-                _currentSong.value = song
-
+                _currentSong.postValue(song)
+                launch {
+                    try {
+                        RetrofitClient.apiService.postPlaySong(song.id)
+                    } catch (_: Exception) {
+                    }
+                }
                 if (autoPlay) {
                     exoPlayer.playWhenReady = true
                     exoPlayer.play()
                 }
-
             } catch (e: Exception) {
-                Log.e("MusicPlayer", "getLink or play failed: ${e.message}")
             }
         }
     }
+
+
 
 
     private fun playSongAtIndex(index: Int, autoPlay: Boolean = true) {

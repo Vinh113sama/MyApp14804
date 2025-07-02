@@ -17,8 +17,8 @@ import com.example.myapp.databinding.DialogDeleteConfirmBinding
 import com.example.myapp.databinding.DialogRenameBinding
 import com.example.myapp.databinding.FragmentPlaylistListBinding
 import com.example.myapp.process.RetrofitClient
+import com.example.myapp.process.getplaylist.Playlist
 import com.example.myapp.process.getplaylist.PlaylistAdapter
-import com.example.myapp.process.getplaylist.PlaylistResponse
 import com.example.myapp.repository.SongRepository
 import com.example.myapp.repository.SongViewModel
 import kotlinx.coroutines.launch
@@ -97,8 +97,7 @@ class PlaylistListFragment : Fragment() {
     private fun loadPlaylists() {
         lifecycleScope.launch {
             try {
-                val userId = viewModel.getUserInformation().id
-                val playlists = viewModel.getPlaylist(userId)
+                val playlists = viewModel.getPlaylist()
                 adapter.submitList(playlists)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -106,7 +105,7 @@ class PlaylistListFragment : Fragment() {
         }
     }
 
-    private fun showRenameDialog(playlist: PlaylistResponse) {
+    private fun showRenameDialog(playlist: Playlist) {
         val dialogBinding = DialogRenameBinding.inflate(layoutInflater)
         val editText = dialogBinding.edtPlaylistName
         editText.setText(playlist.name)
@@ -125,13 +124,13 @@ class PlaylistListFragment : Fragment() {
                 viewModel.updatePlaylistName(
                     playlist.id,
                     newName,
-                    onSuccess = {
-                        Toast.makeText(requireContext(), "Renamed", Toast.LENGTH_SHORT).show()
-                        loadPlaylists() 
+                    onSuccess = { message ->
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                        loadPlaylists()
                         dialog.dismiss()
                     },
-                    onError = {
-                        Toast.makeText(requireContext(), "Rename failed", Toast.LENGTH_SHORT).show()
+                    onError = { message ->
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                     }
                 )
             } else {
@@ -141,8 +140,6 @@ class PlaylistListFragment : Fragment() {
 
         dialog.show()
     }
-
-
 
     private fun showAddPlaylistDialog() {
         val dialogBinding = DialogAddPlaylistBinding.inflate(layoutInflater)
@@ -163,13 +160,13 @@ class PlaylistListFragment : Fragment() {
             if (name.isNotEmpty()) {
                 viewModel.createPlaylist(
                     name = name,
-                    onSuccess = {
-                        Toast.makeText(requireContext(), "Created", Toast.LENGTH_SHORT).show()
+                    onSuccess = { message ->
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         loadPlaylists()
                         dialog.dismiss()
                     },
-                    onError = { msg ->
-                        Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                    onError = { message ->
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                     }
                 )
             } else {
@@ -180,7 +177,7 @@ class PlaylistListFragment : Fragment() {
         dialog.show()
     }
 
-    private fun showDeleteDialog(playlist: PlaylistResponse) {
+    private fun showDeleteDialog(playlist: Playlist) {
         val dialogBinding = DialogDeleteConfirmBinding.inflate(layoutInflater)
 
         val dialog = AlertDialog.Builder(requireContext())
@@ -196,10 +193,13 @@ class PlaylistListFragment : Fragment() {
         dialogBinding.btnDelete.setOnClickListener {
             viewModel.deletePlaylist(
                 playlist.id,
-                onSuccess = {
-                    Toast.makeText(requireContext(), "Deleted", Toast.LENGTH_SHORT).show()
+                onSuccess = { message ->
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                     loadPlaylists()
                     dialog.dismiss()
+                },
+                onError = { message ->
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                 }
             )
         }

@@ -9,6 +9,7 @@ import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -56,7 +57,9 @@ class SongListFragment : Fragment() {
         binding.imgbtnMenu.setOnClickListener {
             (activity as? HomeActivity)?.openDrawer()
         }
-
+        binding.imgbtnSearch.setOnClickListener {
+            findNavController().navigate(R.id.action_songListFragment_to_searchFragment)
+        }
         binding.rcPopular.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -72,11 +75,6 @@ class SongListFragment : Fragment() {
                 }
             }
         })
-
-        binding.imgbtnSearch.setOnClickListener {
-            findNavController().navigate(R.id.action_songListFragment_to_searchFragment)
-        }
-
         setupRecyclerView()
         observeSongs()
         viewModel.loadSongs(SongType.ALL)
@@ -93,7 +91,7 @@ class SongListFragment : Fragment() {
 
     @OptIn(UnstableApi::class)
     private fun setupRecyclerView() {
-        adapter = SongAdapter()
+        adapter = SongAdapter(false, false)
         binding.rcPopular.layoutManager = LinearLayoutManager(requireContext())
         binding.rcPopular.adapter = adapter
 
