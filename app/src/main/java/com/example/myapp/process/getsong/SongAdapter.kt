@@ -36,7 +36,7 @@ class SongAdapter(private val showFavoriteButton: Boolean = false,
 
         holder.binding.tvSongName.text = song.title
         holder.binding.tvArtistName.text = song.artist.name
-        holder.binding.tvDuration.text = fomartDuration(song.duration)
+        holder.binding.tvDuration.text = formatDuration(song.duration)
 
         Glide.with(holder.itemView.context)
             .load(song.imageUrl)
@@ -65,7 +65,7 @@ class SongAdapter(private val showFavoriteButton: Boolean = false,
 
     }
 
-    private fun fomartDuration(seconds: Int): String {
+    private fun formatDuration(seconds: Int): String {
         val minutes = seconds / 60
         val remainingSeconds = seconds % 60
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, remainingSeconds)

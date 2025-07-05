@@ -50,7 +50,7 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 val result: List<Song> = when (type) {
-                    SongType.ALL -> repository.getTopSongs(currentPage)
+                    SongType.ALL -> repository.getAllSongs(currentPage)
                     SongType.VN -> repository.getByGenre("VN", currentPage)
                     SongType.USUK -> repository.getByGenre("US-UK", currentPage)
                     SongType.KPOP -> repository.getByGenre("K-POP", currentPage)

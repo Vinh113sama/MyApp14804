@@ -48,7 +48,7 @@ interface ApiService {
     suspend fun deleteFavoriteSong(@Path("songId") songId: Int): Response<PlaylistAllResponse>
 
     @GET("api/users")
-    suspend fun getUserInfor(): UserResponse
+    suspend fun getUserInfor(): UserInfor
 
     @POST("api/playlists")
     suspend fun createPlaylist(@Body request: NamePlaylistRequest): Response<PlaylistAllResponse>
@@ -87,11 +87,11 @@ interface ApiService {
         @Query("limit") limit: Int = 10
     ): PlaylistSongsResponse
 
-    @GET("api/songs/top-listens")
-    suspend fun fetchTopSongs(
-        @Query("page") page: Int = 1,
-        @Query("limit") limit: Int = 10
-    ): TopSongListResponse
+//    @GET("api/songs/top-listens")
+//    suspend fun fetchTopSongs(
+//        @Query("page") page: Int = 1,
+//        @Query("limit") limit: Int = 10
+//    ): TopSongListResponse
 
     @POST("api/auth/logout")
     suspend fun logout()

@@ -8,7 +8,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -101,7 +100,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
                     exoPlayer.playWhenReady = true
                     exoPlayer.play()
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
     }

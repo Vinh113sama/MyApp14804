@@ -73,6 +73,9 @@ data class FavoriteRequest(
     val songId: Int
 )
 
+data class UserInfor(
+    val data : UserResponse
+)
 data class UserResponse(
     val name: String,
     val id: Int

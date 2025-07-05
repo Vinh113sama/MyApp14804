@@ -35,7 +35,7 @@ class SongRepository(private val apiService: ApiService) {
     }
 
     suspend fun getUserInfor(): UserResponse {
-        return apiService.getUserInfor()
+        return apiService.getUserInfor().data
     }
 
     suspend fun getPlaylistList(): List<Playlist> {
@@ -74,17 +74,20 @@ class SongRepository(private val apiService: ApiService) {
         return apiService.deletePlaylist(playlistId)
     }
 
-    suspend fun getTopSongs(page: Int, limit: Int = 10): List<Song> {
+    suspend fun getAllSongs(page: Int, limit: Int = 10): List<Song> {
         return try {
-            val response = apiService.fetchTopSongs(page, limit)
-            response.data.map {
+            val response = apiService.getSongs(page = page, limit = limit)
+            response.data.map { apiSong ->
                 Song(
-                    id = it.id,
-                    title = it.title,
-                    duration = it.duration,
-                    url = it.url,
-                    imageUrl = it.imageUrl,
-                    artist = Artist(it.artist.id, it.artist.name),
+                    id = apiSong.id,
+                    title = apiSong.title,
+                    duration = apiSong.duration,
+                    url = apiSong.url,
+                    imageUrl = apiSong.imageUrl,
+                    artist = Artist(
+                        id = apiSong.artist.id,
+                        name = apiSong.artist.name
+                    ),
                     isFavorite = false
                 )
             }

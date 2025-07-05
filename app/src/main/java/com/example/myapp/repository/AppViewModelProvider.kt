@@ -17,8 +17,4 @@ object AppViewModelProvider {
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[MusicPlayerViewModel::class.java]
     }
-
-    fun clear() {
-        viewModelStore.clear()
-    }
 }

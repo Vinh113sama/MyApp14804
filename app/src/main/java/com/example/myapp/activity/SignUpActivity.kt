@@ -63,7 +63,7 @@ class SignUpActivity : AppCompatActivity() {
                                 try {
                                     val json = JSONObject(errorBody)
                                     json.optString("message", "Registration failed.")
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     "Registration failed."
                                 }
                             } else {
